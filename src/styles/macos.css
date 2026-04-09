@@ -169,6 +169,7 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
+  height: 80px;
 }
 
 .dock-separator {
@@ -179,7 +180,7 @@
   align-self: center;
 }
 
-.dock-item {
+/* .dock-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -187,6 +188,14 @@
   cursor: default;
   position: relative;
   transition: transform .2s cubic-bezier(.34, 1.56, .64, 1);
+} */
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  cursor: default;
 }
 
 .dock-item:hover {
@@ -248,3 +257,21 @@
 .di-figma   { background: linear-gradient(145deg, #1a1a2e, #8B5CF6); color: var(--color-white); font-weight: 700; font-size: 1rem; }
 .di-github  { background: linear-gradient(145deg, #1a1a1a, #333); border: .5px solid #555; }
 .di-trash   { background: linear-gradient(145deg, #232526, #414345); border: .5px solid #555; }
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: default;
+}
+
+.dock-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border-radius: 12px;
+  transition: none;
+  flex-shrink: 0;
+}
