@@ -17,6 +17,10 @@ import { Menubar }    from './components/macos/Menubar.js'
 import { Dock }       from './components/macos/Dock.js'
 import { Desktop }    from './components/macos/Desktop.js'
 import { About }      from './pages/About.js'
+import { Skills }     from './pages/Skills.js'
+import { Projects }   from './pages/Projects.js'
+import { Blog }       from './pages/Blog.js'
+import { Contact }    from './pages/Contact.js'
 import { openWindow } from './utils/windowManager.js'
 
 const isMobile = window.innerWidth <= 768
@@ -30,9 +34,14 @@ if (!isMobile) {
   new Desktop()
   new Dock()
   new About()
+  new Skills()
+  new Projects()
+  new Blog()
+  new Contact()
 
-  // Open about by default after short delay
-  setTimeout(() => openWindow('about'), 300)
+  // Open default windows
+  setTimeout(() => openWindow('about'),    300)
+  setTimeout(() => openWindow('terminal'), 600)
 
   console.log('✓ macOS UI ready')
 }
