@@ -1,0 +1,86 @@
+/* src/styles/responsive.css */
+/* ═══════════════════════════════════════
+   SBOUNDY — Responsive
+═══════════════════════════════════════ */
+
+/* ── TABLET (769px – 1024px) ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  #dock {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .dock-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .win {
+    min-width: 420px;
+  }
+
+  #win-about    { width: 680px; height: 500px; left: 60px;  }
+  #win-terminal { width: 560px; height: 400px; left: 180px; }
+  #win-projects { width: 700px; height: 480px; left: 50px;  }
+  #win-blog     { width: 560px; height: 420px; left: 120px; }
+  #win-contact  { width: 580px; height: 440px; left: 130px; }
+}
+
+/* ── SMALL DESKTOP (1024px – 1280px) ── */
+@media (min-width: 1025px) and (max-width: 1280px) {
+
+  #win-about    { left: 80px;  }
+  #win-terminal { left: 200px; }
+  #win-projects { left: 60px;  }
+}
+
+/* ── LARGE DESKTOP (>1440px) ── */
+@media (min-width: 1440px) {
+
+  #win-about    { left: 140px; }
+  #win-terminal { left: 300px; }
+  #win-projects { left: 100px; }
+}
+
+/* ── iOS SAFE AREAS (notch devices) ── */
+@media (max-width: 768px) {
+
+  #ios-home {
+    padding-bottom: max(100px, env(safe-area-inset-bottom, 100px));
+  }
+
+  #ios-dock {
+    bottom: max(24px, env(safe-area-inset-bottom, 24px));
+  }
+
+  .home-indicator {
+    bottom: max(8px, env(safe-area-inset-bottom, 8px));
+  }
+
+  .ios-scroll {
+    padding-bottom: max(80px, env(safe-area-inset-bottom, 80px));
+  }
+
+  /* Larger phones */
+  @media (min-height: 812px) {
+    .ios-app__icon { width: 64px; height: 64px; font-size: 30px; }
+    .ios-widget    { padding: 18px 22px; }
+  }
+
+  /* Small phones */
+  @media (max-height: 667px) {
+    .ios-widget { padding: 12px 16px; margin-bottom: 16px; }
+    .ios-apps   { gap: 14px 12px; }
+    .ios-app__icon { width: 52px; height: 52px; font-size: 24px; }
+  }
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
