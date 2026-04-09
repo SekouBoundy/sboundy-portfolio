@@ -16,23 +16,23 @@ import { LangToggle } from './components/shared/LangToggle.js'
 import { Menubar }    from './components/macos/Menubar.js'
 import { Dock }       from './components/macos/Dock.js'
 import { Desktop }    from './components/macos/Desktop.js'
+import { About }      from './pages/About.js'
+import { openWindow } from './utils/windowManager.js'
 
 const isMobile = window.innerWidth <= 768
 
-// ── Shared utilities ──
 export const lang  = new LangToggle()
 export const clock = new Clock([])
 
-// ── macOS ──
 if (!isMobile) {
   new Cursor()
   new Menubar()
   new Desktop()
   new Dock()
-  console.log('✓ macOS UI ready')
-}
+  new About()
 
-// ── iOS ── (coming next)
-if (isMobile) {
-  console.log('✓ iOS UI coming next...')
+  // Open about by default after short delay
+  setTimeout(() => openWindow('about'), 300)
+
+  console.log('✓ macOS UI ready')
 }

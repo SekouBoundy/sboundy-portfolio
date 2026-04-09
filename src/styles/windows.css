@@ -199,3 +199,182 @@
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ═══════════════════════════════════════
+   ABOUT WINDOW — content styles
+═══════════════════════════════════════ */
+
+.about-hero {
+  display: flex;
+  gap: 1.75rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.about-photo {
+  width: 115px;
+  height: 155px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  border: var(--border-subtle);
+  background: var(--color-bg-dark);
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.about-name {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  letter-spacing: .08em;
+  color: var(--color-white);
+  margin-bottom: .25rem;
+}
+
+.about-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-accent-glow);
+  border: var(--border-accent);
+  border-radius: var(--radius-pill);
+  padding: 3px 12px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--color-accent);
+  margin-bottom: .6rem;
+}
+
+.about-badge__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: blink 2s infinite;
+}
+
+.about-info p {
+  font-size: var(--fs-small);
+  color: var(--color-secondary);
+  line-height: 1.85;
+}
+
+.about-info p strong {
+  color: var(--color-white);
+  font-weight: var(--fw-medium);
+}
+
+/* Stats */
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+
+.astat {
+  background: rgba(255, 255, 255, .04);
+  border: var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: .7rem;
+  text-align: center;
+  transition: var(--transition-fast);
+}
+
+.astat:hover {
+  border-color: rgba(139, 92, 246, .3);
+}
+
+.astat__num {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.astat__num--sm {
+  font-size: 1.1rem;
+  padding-top: .35rem;
+}
+
+.astat__label {
+  font-size: .68rem;
+  color: var(--color-secondary);
+  margin-top: .15rem;
+}
+
+/* Stack tab */
+.stack-group {
+  margin-bottom: 1.25rem;
+}
+
+.stack-label {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-bold);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+  margin-bottom: .5rem;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+
+.tag {
+  font-size: .7rem;
+  font-weight: var(--fw-medium);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-glow);
+  border: var(--border-accent);
+  color: var(--color-accent);
+  transition: var(--transition-fast);
+}
+
+.tag:hover {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
+/* Journey tab */
+.journey-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.journey-item {
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  gap: 1.25rem;
+  border-left: 1px solid rgba(139, 92, 246, .3);
+  padding-left: 1rem;
+}
+
+.journey-date {
+  font-size: .75rem;
+  font-weight: var(--fw-bold);
+  color: var(--color-accent);
+  padding-top: .1rem;
+}
+
+.journey-role {
+  font-size: .9rem;
+  font-weight: var(--fw-bold);
+  color: var(--color-white);
+  margin-bottom: .2rem;
+}
+
+.journey-desc {
+  font-size: .78rem;
+  color: var(--color-secondary);
+  line-height: 1.7;
+}
