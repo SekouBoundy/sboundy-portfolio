@@ -1,0 +1,65 @@
+/* src/styles/animations.css */
+/* ═══════════════════════════════════════
+   SBOUNDY — Animations & Keyframes
+═══════════════════════════════════════ */
+
+/* ── WINDOW OPEN ── */
+@keyframes winOpen {
+  from { opacity: 0; transform: scale(.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes winClose {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(.9); }
+}
+
+@keyframes winMinimize {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(.4) translateY(120px); }
+}
+
+/* ── GENERAL ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STATUS DOT ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .3; }
+}
+
+/* ── TERMINAL CURSOR ── */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── DOCK FLOAT ── */
+@keyframes dockFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(-4px); }
+}
+
+/* ── iOS APP OPEN ── */
+@keyframes iosAppOpen {
+  from { opacity: 0; transform: scale(.92) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes iosAppClose {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(.92) translateY(20px); }
+}

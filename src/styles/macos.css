@@ -1,0 +1,250 @@
+/* src/styles/macos.css */
+/* ═══════════════════════════════════════
+   SBOUNDY — macOS Desktop
+═══════════════════════════════════════ */
+
+/* ── DESKTOP WALLPAPER ── */
+#macos {
+  background:
+    radial-gradient(ellipse 80% 80% at 20% 110%, #2d1b69 0%, #0f0f1a 50%, #0a0a0f 100%),
+    radial-gradient(ellipse 60% 60% at 80% -10%, #4c1d95 0%, transparent 60%);
+  cursor: none;
+  user-select: none;
+}
+
+#macos::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 120% at 15% 80%, rgba(109, 40, 217, .35) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at 85% 20%, rgba(139, 92, 246, .2)  0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* Big watermark SBOUNDY behind everything */
+#macos::after {
+  content: 'SBOUNDY';
+  font-family: var(--font-display);
+  font-size: 22vw;
+  letter-spacing: .08em;
+  color: rgba(255, 255, 255, .018);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* ── MENUBAR ── */
+#menubar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--menubar-height);
+  z-index: var(--z-menubar);
+  background: rgba(20, 10, 40, .78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: .5px solid rgba(255, 255, 255, .08);
+}
+
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.menu-item {
+  font-size: 13px;
+  font-weight: var(--fw-medium);
+  color: rgba(255, 255, 255, .9);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+  cursor: default;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, .15);
+}
+
+.menu-item--brand {
+  font-weight: var(--fw-bold);
+}
+
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-right span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, .85);
+}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-pill {
+  display: flex;
+  gap: 2px;
+  background: rgba(255, 255, 255, .08);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.lang-btn {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  padding: 1px 8px;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, .6);
+  transition: var(--transition-fast);
+  cursor: default;
+}
+
+.lang-btn.active {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
+/* ── DESKTOP ICONS ── */
+.desktop-icons {
+  position: absolute;
+  top: calc(var(--menubar-height) + 20px);
+  right: 20px;
+  z-index: var(--z-desktop);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.desk-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  cursor: default;
+  transition: var(--transition-fast);
+}
+
+.desk-icon:hover {
+  background: rgba(255, 255, 255, .1);
+}
+
+.desk-icon__img {
+  font-size: 2.4rem;
+}
+
+.desk-icon__name {
+  font-size: 11px;
+  color: var(--color-white);
+  text-align: center;
+  line-height: 1.3;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
+}
+
+/* ── DOCK ── */
+#dock {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-dock);
+  background: rgba(255, 255, 255, .12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: .5px solid rgba(255, 255, 255, .18);
+  border-radius: 18px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.dock-separator {
+  width: .5px;
+  height: 48px;
+  background: rgba(255, 255, 255, .2);
+  margin: 0 4px;
+  align-self: center;
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+  position: relative;
+  transition: transform .2s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.dock-item:hover {
+  transform: translateY(-10px) scale(1.2);
+}
+
+.dock-item:hover .dock-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dock-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.dock-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .6);
+}
+
+.dock-dot--hidden {
+  opacity: 0;
+}
+
+.dock-label {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  background: rgba(20, 10, 40, .85);
+  backdrop-filter: blur(10px);
+  color: var(--color-white);
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .15s, transform .15s;
+  border: .5px solid rgba(255, 255, 255, .12);
+}
+
+/* Dock icon themes */
+.di-finder  { background: linear-gradient(145deg, #4facfe, #00f2fe); }
+.di-term    { background: linear-gradient(145deg, #1a1a1a, #2d2d2d); border: .5px solid #444; color: #28C840; font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; }
+.di-photos  { background: linear-gradient(145deg, #f093fb, #f5576c); }
+.di-notes   { background: linear-gradient(145deg, #f9ca24, #f0932b); }
+.di-mail    { background: linear-gradient(145deg, #4776e6, #8e54e9); }
+.di-figma   { background: linear-gradient(145deg, #1a1a2e, #8B5CF6); color: var(--color-white); font-weight: 700; font-size: 1rem; }
+.di-github  { background: linear-gradient(145deg, #1a1a1a, #333); border: .5px solid #555; }
+.di-trash   { background: linear-gradient(145deg, #232526, #414345); border: .5px solid #555; }

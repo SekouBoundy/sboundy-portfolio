@@ -2,23 +2,13 @@
   "name": "sboundy-portfolio",
   "version": "1.0.0",
   "description": "SBOUNDY — Developer · Designer · Creative",
-  "main": "vite.config.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SekouBoundy/sboundy-portfolio.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/SekouBoundy/sboundy-portfolio/issues"
-  },
-  "homepage": "https://github.com/SekouBoundy/sboundy-portfolio#readme",
   "devDependencies": {
-    "vite": "^8.0.8"
+    "vite": "^5.0.0"
   }
 }
