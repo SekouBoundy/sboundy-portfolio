@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import './styles/tokens.css'
   import './styles/reset.css'
   import './styles/macos.css'
@@ -6,22 +6,43 @@
   import './styles/windows.css'
   import './styles/animations.css'
   import './styles/responsive.css'
+  import { onMount } from 'svelte'
   import Menubar from './components/macos/Menubar.svelte'
-
-
   import Desktop from './components/macos/Desktop.svelte'
   import Dock    from './components/macos/Dock.svelte'
+  import { Cursor } from './components/shared/Cursor.ts'
 
   const isMobile = window.innerWidth <= 768
+
+  onMount(() => {
+    if (!isMobile) new Cursor()
+  })
 </script>
 
 {#if !isMobile}
   <div id="macos">
     <Menubar />
-    <Desktop />
-    <Dock />
+    <div class="macos-body">
+      <Desktop />
     </div>
-
+    <Dock />
+  </div>
 {:else}
   <div id="ios"></div>
 {/if}
+
+<style>
+  #macos {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .macos-body {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+</style>

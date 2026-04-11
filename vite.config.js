@@ -1,15 +1,18 @@
 import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { svelte }       from '@sveltejs/vite-plugin-svelte'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [svelte()],
-  root: '.',
-  publicDir: 'public',
-  build: {
-    outDir: 'dist',
-  },
-  server: {
-    port: 3000,
-    open: true,
-  },
+  resolve: {
+    alias: {
+      '$state':      resolve(__dirname, 'src/state'),
+      '$components': resolve(__dirname, 'src/components'),
+      '$data':       resolve(__dirname, 'src/data'),
+      '$utils':      resolve(__dirname, 'src/utils'),
+    }
+  }
 })
