@@ -36,10 +36,11 @@
     class="win"
     class:win--maximized={win.maximized}
     class:win--dragging={dragging}
-    style:top="{win.maximized ? 28 : win.top}px"
-    style:left="{win.maximized ? 0 : win.left}px"
-    style:width="{win.maximized ? '100vw' : win.w + 'px'}"
-    style:height="{win.maximized ? 'calc(100vh - 28px)' : win.h + 'px'}"
+    style:top="{win.maximized ? 0 : win.top}px"
+    style:left="{win.maximized ? 100 : win.left}px"
+    // style:right="{win.maximized ? 0 : undefined}px"
+    style:width="{win.maximized ? '100%' : win.w + 'px'}"
+    style:height="{win.maximized ? '100%' : win.h + 'px'}"
     style:z-index={win.z}
     onmousedown={() => focusWin(id)}
   >
@@ -129,13 +130,14 @@
   }
 
   .tl {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     border: none;
-    cursor: default;
+    cursor: default !important;
     position: relative;
     flex-shrink: 0;
+    transition: filter .15s;
   }
 
   .tl::after {
@@ -145,21 +147,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 7px;
-    color: rgba(0,0,0,.55);
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(0,0,0,.6);
     opacity: 0;
     transition: opacity .15s;
   }
 
-  .traffic-lights:hover .tl::after { opacity: 1; }
+  /* show icons when hovering anywhere on the chrome */
+  .win-chrome:hover .tl::after { opacity: 1; }
+  .tl:hover { filter: brightness(1.15); }
 
   .tl--close  { background: #ff5f57; }
   .tl--min    { background: #febc2e; }
   .tl--max    { background: #28c840; }
 
   .tl--close::after { content: '✕'; }
-  .tl--min::after   { content: '−'; }
-  .tl--max::after   { content: '+'; }
+  .tl--min::after   { content: '−'; font-size: 10px; }
+  .tl--max::after   { content: '+'; font-size: 10px; }
 
   /* Content */
   .win-content {
