@@ -17,3 +17,7 @@ export const windows = writable({
 
 export const topZ     = writable(10)
 export const isMobile = writable(window.innerWidth <= 768)
+
+const savedWallpaper = localStorage.getItem('wallpaper') ?? '/wallpapers/Valley.jpg'
+export const currentWallpaper = writable<string>(savedWallpaper)
+currentWallpaper.subscribe(v => localStorage.setItem('wallpaper', v))

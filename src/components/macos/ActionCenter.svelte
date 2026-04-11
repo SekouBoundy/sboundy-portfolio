@@ -1,6 +1,6 @@
 <!-- src/components/macos/ActionCenter.svelte -->
 <script lang="ts">
-  import { currentTheme, currentLang } from '../../stores/index.ts'
+  import { currentTheme, currentLang, currentWallpaper } from '../../stores/index.ts'
   import type { Theme, Lang } from '../../stores/index.ts'
 
   const { onclose }: { onclose: () => void } = $props()
@@ -15,7 +15,22 @@
     { id: 'pink',   hsl: '349, 100%, 59%' },
   ]
 
+  const WALLPAPERS = [
+    { name: 'The Beach',  file: 'The Beach.jpg'  },
+    { name: 'The Cliffs', file: 'The Cliffs.jpg' },
+    { name: 'The Desert', file: 'The Desert.jpg' },
+    { name: 'The Lake',   file: 'The Lake.jpg'   },
+    { name: 'Tree',       file: 'Tree.jpg'        },
+    { name: 'Valley',     file: 'Valley.jpg'      },
+  ]
+
   let selectedColor = $state('blue')
+  let showPicker    = $state(false)
+
+  function selectWallpaper(file: string) {
+    currentWallpaper.set(`/wallpapers/${file}`)
+    showPicker = false
+  }
 
   function toggleTheme() {
     currentTheme.update((t: Theme) => t === 'dark' ? 'light' : 'dark')
@@ -80,13 +95,31 @@
   </div>
 
   <!-- ── Row 3: Wallpaper card ── -->
-  <div class="ac-surface ac-surface--wallpaper">
-    <div class="ac-wp-thumb"></div>
+  <button class="ac-surface ac-surface--wallpaper" onclick={() => showPicker = !showPicker}>
+    <div
+      class="ac-wp-thumb"
+      style:background-image={$currentWallpaper ? `url('${$currentWallpaper}')` : undefined}
+    ></div>
     <div class="ac-wp-info">
-      <span class="ac-wp-name">Ventura</span>
-      <span class="ac-wp-sub">Dynamic Wallpaper</span>
+      <span class="ac-wp-name">{$currentWallpaper ? $currentWallpaper.split('/').pop()!.replace('.jpg','') : 'Wallpaper'}</span>
+      <span class="ac-wp-sub">{showPicker ? 'Choose below ↓' : 'Click to change'}</span>
     </div>
-  </div>
+  </button>
+
+  <!-- ── Wallpaper picker ── -->
+  {#if showPicker}
+    <div class="ac-surface ac-wp-picker">
+      {#each WALLPAPERS as wp}
+        <button
+          class="ac-wp-option"
+          class:ac-wp-option--selected={$currentWallpaper === `/wallpapers/${wp.file}`}
+          onclick={() => selectWallpaper(wp.file)}
+          title={wp.name}
+          style:background-image="url('/wallpapers/{wp.file}')"
+        ></button>
+      {/each}
+    </div>
+  {/if}
 
 </div>
 
@@ -239,6 +272,41 @@
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
+    width: 100%;
+    text-align: left;
+    cursor: default;
+    transition: background 0.12s;
+  }
+
+  .ac-surface--wallpaper:hover {
+    background: hsla(var(--system-color-dark-hsl), 0.10);
+  }
+
+  /* ── Wallpaper picker grid ── */
+  .ac-wp-picker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .ac-wp-option {
+    aspect-ratio: 16/10;
+    border-radius: 6px;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid transparent;
+    transition: transform 0.1s, border-color 0.1s;
+    cursor: default;
+  }
+
+  .ac-wp-option:hover {
+    transform: scale(1.04);
+  }
+
+  .ac-wp-option--selected {
+    border-color: hsl(var(--system-color-primary-hsl));
+    box-shadow: 0 0 0 1px hsl(var(--system-color-primary-hsl));
   }
 
   .ac-wp-thumb {

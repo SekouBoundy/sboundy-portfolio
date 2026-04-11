@@ -7,7 +7,7 @@ import './styles/windows.css'
 import './styles/animations.css'
 import './styles/responsive.css'
 import { onMount } from 'svelte'
-import { currentTheme } from './stores/index'
+import { currentTheme, currentWallpaper } from './stores/index'
 import Menubar from './components/macos/Menubar.svelte'
 import Desktop from './components/macos/Desktop.svelte'
 import Dock    from './components/macos/Dock.svelte'
@@ -27,7 +27,7 @@ onMount(() => {
 </script>
 
 {#if !isMobile}
-  <div id="macos">
+  <div id="macos" style:background-image={$currentWallpaper ? `url('${$currentWallpaper}')` : undefined} style:background-size="cover" style:background-position="center">
     <Menubar />
     <div class="macos-body">
       <Desktop />

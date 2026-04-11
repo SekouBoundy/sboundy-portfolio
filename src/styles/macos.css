@@ -8,8 +8,16 @@
   background:
     radial-gradient(ellipse 80% 80% at 20% 110%, #2d1b69 0%, #0f0f1a 50%, #0a0a0f 100%),
     radial-gradient(ellipse 60% 60% at 80% -10%, #4c1d95 0%, transparent 60%);
+  background-size: cover;
+  background-position: center;
   cursor: none;
   user-select: none;
+}
+
+/* When a wallpaper image is active, hide the gradient pseudo-elements */
+#macos[style*="background-image"]::before,
+#macos[style*="background-image"]::after {
+  display: none;
 }
 
 #macos::before {
