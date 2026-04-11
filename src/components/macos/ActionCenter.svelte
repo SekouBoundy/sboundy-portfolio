@@ -22,6 +22,7 @@
     { name: 'The Lake',   file: 'The Lake.jpg'   },
     { name: 'Tree',       file: 'Tree.jpg'        },
     { name: 'Valley',     file: 'Valley.jpg'      },
+    {name: 'Tombouctou',    file: 'Tombouctou.png'   },
   ]
 
   let selectedColor = $state('blue')

@@ -10,8 +10,12 @@
     radial-gradient(ellipse 60% 60% at 80% -10%, #4c1d95 0%, transparent 60%);
   background-size: cover;
   background-position: center;
-  cursor: none;
+  cursor: url('/cursor.png') 0 0, default;
   user-select: none;
+}
+
+#macos * {
+  cursor: url('/cursor1.png') 0 0, default;
 }
 
 /* When a wallpaper image is active, hide the gradient pseudo-elements */

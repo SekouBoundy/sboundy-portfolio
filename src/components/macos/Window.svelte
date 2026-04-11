@@ -85,7 +85,9 @@
     border-radius: 0 !important;
   }
 
-  .win--dragging {
+  .win--dragging,
+  .win--dragging * {
+    cursor: grabbing !important;
     user-select: none;
     box-shadow:
       0 40px 120px rgba(0,0,0,.9),
@@ -102,8 +104,12 @@
     background: var(--win-chrome-bg, rgba(30, 15, 60, .92));
     backdrop-filter: blur(20px);
     border-bottom: .5px solid var(--win-chrome-border, rgba(255,255,255,.08));
-    cursor: grab;
+    cursor: grab !important;
     user-select: none;
+  }
+
+  .win-chrome:active {
+    cursor: grabbing !important;
   }
 
   :global(body.light) .win-chrome {

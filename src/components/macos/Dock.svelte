@@ -35,16 +35,16 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    gap: 6px;
-    padding: 8px 12px;
+    gap: 8px;
+    padding: 10px 16px;
     margin: 0 auto 12px;
     width: fit-content;
     background: rgba(255,255,255,.12);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: .5px solid rgba(255,255,255,.18);
-    border-radius: 18px;
-    height: 76px;
+    border-radius: 22px;
+    height: 96px;
   }
 
   .dock-sep {

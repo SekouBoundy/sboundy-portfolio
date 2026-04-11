@@ -9,7 +9,7 @@
     item: { id?: WinID; img?: string; emoji?: string; text?: string; label: string }
   } = $props()
 
-  const baseWidth     = 52
+  const baseWidth     = 64
   const distanceLimit = baseWidth * 6
 
   const distanceInput = [
@@ -107,12 +107,10 @@
 
   .dock-icon {
     border-radius: 13px;
-    background: rgba(255,255,255,.15);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 26px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.4);
     overflow: hidden;
     flex-shrink: 0;
     will-change: width, height;
@@ -123,6 +121,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: 13px;
+    display: block;
   }
 
   .dock-text {
