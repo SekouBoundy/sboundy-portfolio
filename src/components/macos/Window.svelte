@@ -62,6 +62,10 @@
 {/if}
 
 <style>
+  :global(body.light) .win {
+    border-color: rgba(0,0,0,.10);
+  }
+
   .win {
     position: absolute;
     display: flex;
@@ -95,11 +99,16 @@
     display: flex;
     align-items: center;
     padding: 0 12px;
-    background: rgba(30, 15, 60, .92);
+    background: var(--win-chrome-bg, rgba(30, 15, 60, .92));
     backdrop-filter: blur(20px);
-    border-bottom: .5px solid rgba(255,255,255,.08);
+    border-bottom: .5px solid var(--win-chrome-border, rgba(255,255,255,.08));
     cursor: grab;
     user-select: none;
+  }
+
+  :global(body.light) .win-chrome {
+    --win-chrome-bg: rgba(225, 215, 255, .92);
+    --win-chrome-border: rgba(0,0,0,.08);
   }
 
   .win-chrome:active { cursor: grabbing; }
@@ -152,7 +161,11 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: rgba(18, 8, 40, .95);
+    background: var(--win-content-bg, rgba(18, 8, 40, .95));
     backdrop-filter: blur(30px);
+  }
+
+  :global(body.light) .win-content {
+    --win-content-bg: rgba(250, 248, 255, .98);
   }
 </style>

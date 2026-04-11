@@ -103,3 +103,21 @@
   --z-menubar:  1000;
   --z-cursor:   9999;
 }
+
+/* ── LIGHT MODE OVERRIDES ── */
+body.light {
+  --color-bg-dark:    #F0F0F0;
+  --color-surface:    #FFFFFF;
+  --color-muted:      #C0C0C0;
+  --color-secondary:  #666666;
+  --color-white:      #111111;
+
+  --border-subtle:    0.5px solid rgba(0, 0, 0, 0.08);
+  --border-default:   0.5px solid rgba(0, 0, 0, 0.14);
+
+  --shadow-sm:  0 4px 16px rgba(0, 0, 0, 0.10);
+  --shadow-md:  0 12px 40px rgba(0, 0, 0, 0.15);
+  --shadow-lg:  0 24px 80px rgba(0, 0, 0, 0.18);
+  --shadow-win: 0 32px 100px rgba(0, 0, 0, 0.18),
+                0 0 0 0.5px rgba(0, 0, 0, 0.10);
+}

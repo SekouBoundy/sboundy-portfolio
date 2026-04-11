@@ -1,9 +1,12 @@
+// src/stores/index.ts
 import { writable } from 'svelte/store'
 
-// Language — 'en' | 'fr'
-export const currentLang = writable('en')
+export type Theme = 'dark' | 'light'
+export type Lang   = 'en'  | 'fr'
 
-// Windows state — which windows are open/minimized/focused
+export const currentLang  = writable<Lang>('en')
+export const currentTheme = writable<Theme>('dark')
+
 export const windows = writable({
   about:    { open: false, minimized: false, z: 1 },
   skills:   { open: false, minimized: false, z: 1 },
@@ -12,8 +15,5 @@ export const windows = writable({
   contact:  { open: false, minimized: false, z: 1 },
 })
 
-// Top z-index tracker
-export const topZ = writable(10)
-
-// Device
+export const topZ     = writable(10)
 export const isMobile = writable(window.innerWidth <= 768)

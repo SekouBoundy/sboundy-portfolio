@@ -1,22 +1,29 @@
 <script lang="ts">
-  import './styles/tokens.css'
-  import './styles/reset.css'
-  import './styles/macos.css'
-  import './styles/ios.css'
-  import './styles/windows.css'
-  import './styles/animations.css'
-  import './styles/responsive.css'
-  import { onMount } from 'svelte'
-  import Menubar from './components/macos/Menubar.svelte'
-  import Desktop from './components/macos/Desktop.svelte'
-  import Dock    from './components/macos/Dock.svelte'
-  import { Cursor } from './components/shared/Cursor.ts'
+import './styles/tokens.css'
+import './styles/reset.css'
+import './styles/macos.css'
+import './styles/ios.css'
+import './styles/windows.css'
+import './styles/animations.css'
+import './styles/responsive.css'
+import { onMount } from 'svelte'
+import { currentTheme } from './stores/index'
+import Menubar from './components/macos/Menubar.svelte'
+import Desktop from './components/macos/Desktop.svelte'
+import Dock    from './components/macos/Dock.svelte'
+import { Cursor } from './components/shared/Cursor.ts'
 
-  const isMobile = window.innerWidth <= 768
+const isMobile = window.innerWidth <= 768
 
-  onMount(() => {
-    if (!isMobile) new Cursor()
-  })
+// ← ADD: sync body class with theme store
+$effect(() => {
+  document.body.classList.remove('dark', 'light')
+  document.body.classList.add($currentTheme)
+})
+
+onMount(() => {
+  if (!isMobile) new Cursor()
+})
 </script>
 
 {#if !isMobile}

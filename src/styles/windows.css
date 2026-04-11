@@ -672,3 +672,97 @@
   border: var(--border-accent);
   color: var(--color-accent);
 }
+/* ══════════════════════════════════════
+   LIGHT MODE — window overrides
+══════════════════════════════════════ */
+
+body.light .win {
+  border-color: rgba(0, 0, 0, .10);
+}
+
+body.light .win.focused {
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, .20),
+    0 0 0 .5px rgba(0, 0, 0, .12);
+}
+
+body.light .win-chrome {
+  background: rgba(230, 220, 255, .90);
+  border-bottom-color: rgba(0, 0, 0, .08);
+}
+
+body.light .win-chrome--dark {
+  background: #e8e0ff;
+}
+
+body.light .win-title {
+  color: rgba(0, 0, 0, .75);
+}
+
+body.light .win-sidebar {
+  background: rgba(235, 228, 255, .90);
+  border-right-color: rgba(0, 0, 0, .07);
+}
+
+body.light .win-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, .12);
+}
+
+body.light .sidebar-section {
+  color: #888888;
+}
+
+body.light .sidebar-item {
+  color: rgba(0, 0, 0, .60);
+}
+
+body.light .sidebar-item:hover {
+  background: rgba(0, 0, 0, .06);
+  color: #111111;
+}
+
+body.light .sidebar-item.active {
+  background: rgba(139, 92, 246, .18);
+  color: #111111;
+}
+
+body.light .win-main {
+  background: rgba(250, 248, 255, .95);
+}
+
+body.light .win-main::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, .12);
+}
+
+/* About */
+body.light .about-name   { color: #111111; }
+body.light .about-info p { color: #555555; }
+body.light .about-info p strong { color: #111111; }
+body.light .astat { background: rgba(0, 0, 0, .03); }
+body.light .journey-role { color: #111111; }
+
+/* Projects */
+body.light .proj-card { background: rgba(0, 0, 0, .03); }
+body.light .proj-title { color: #111111; }
+body.light .proj-desc  { color: #666666; }
+body.light .proj-thumb__label { color: rgba(0, 0, 0, .5); }
+
+/* Contact */
+body.light .contact-title  { color: #111111; }
+body.light .contact-sub    { color: #666666; }
+body.light .contact-btn {
+  background: rgba(0, 0, 0, .04);
+  color: #111111;
+}
+body.light .contact-btn__arrow { color: rgba(0, 0, 0, .25); }
+
+/* Blog / Notes */
+body.light .notes-list {
+  background: rgba(235, 228, 255, .85);
+  border-right-color: rgba(0, 0, 0, .07);
+}
+body.light .note-item { border-bottom-color: rgba(0, 0, 0, .05); }
+body.light .note-item:hover  { background: rgba(0, 0, 0, .04); }
+body.light .note-item__title { color: #111111; }
+body.light .note-content__title { color: #111111; }
+body.light .note-content__body  { color: #666666; }

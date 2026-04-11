@@ -275,3 +275,75 @@
   transition: none;
   flex-shrink: 0;
 }
+/* ══════════════════════════════════════
+   LIGHT MODE — macOS overrides
+══════════════════════════════════════ */
+
+body.light #macos {
+  background:
+    radial-gradient(ellipse 80% 80% at 20% 110%, #ddd6fe 0%, #ede9fe 50%, #f5f3ff 100%),
+    radial-gradient(ellipse 60% 60% at 80% -10%, #c4b5fd 0%, transparent 60%);
+}
+
+body.light #macos::before {
+  background:
+    radial-gradient(ellipse 70% 120% at 15% 80%, rgba(139, 92, 246, .15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at 85% 20%, rgba(109, 40, 217, .10) 0%, transparent 55%);
+}
+
+body.light #macos::after {
+  color: rgba(0, 0, 0, .04);
+}
+
+body.light #menubar {
+  background: rgba(240, 235, 255, .82);
+  border-bottom-color: rgba(0, 0, 0, .08);
+}
+
+body.light .menu-item {
+  color: rgba(0, 0, 0, .85);
+}
+
+body.light .menu-item:hover {
+  background: rgba(0, 0, 0, .08);
+}
+
+body.light .menu-right span {
+  color: rgba(0, 0, 0, .75);
+}
+
+body.light .lang-pill {
+  background: rgba(0, 0, 0, .07);
+}
+
+body.light .lang-btn {
+  color: rgba(0, 0, 0, .5);
+}
+
+body.light .desk-icon__name {
+  color: #111111;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, .6);
+}
+
+body.light .desk-icon:hover {
+  background: rgba(0, 0, 0, .08);
+}
+
+body.light #dock {
+  background: rgba(255, 255, 255, .55);
+  border-color: rgba(0, 0, 0, .12);
+}
+
+body.light .dock-separator {
+  background: rgba(0, 0, 0, .15);
+}
+
+body.light .dock-dot {
+  background: rgba(0, 0, 0, .4);
+}
+
+body.light .dock-label {
+  background: rgba(240, 235, 255, .92);
+  color: #111111;
+  border-color: rgba(0, 0, 0, .10);
+}
