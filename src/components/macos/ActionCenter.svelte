@@ -6,6 +6,7 @@
   const { onclose }: { onclose: () => void } = $props()
 
   const COLORS = [
+    { id: 'glass',  hsl: '0, 0%, 80%'     },
     { id: 'orange', hsl: '35, 100%, 50%'  },
     { id: 'green',  hsl: '135, 59%, 49%'  },
     { id: 'cyan',   hsl: '199, 78%, 55%'  },
@@ -77,15 +78,16 @@
     </button>
   </div>
 
-  <!-- ── Row 2: System Color ── -->
+  <!-- ── Row 2: Window Color ── -->
   <div class="ac-surface">
-    <p class="ac-surface__title">System Color</p>
+    <p class="ac-surface__title">Window Color</p>
     <div class="ac-colors">
       {#each COLORS as c}
         <button
           class="ac-dot"
           class:ac-dot--selected={selectedColor === c.id}
-          style:background="hsl({c.hsl})"
+          class:ac-dot--glass={c.id === 'glass'}
+          style:background={c.id === 'glass' ? undefined : `hsl(${c.hsl})`}
           onclick={() => setColor(c.id, c.hsl)}
           aria-label={c.id}
         >
@@ -260,6 +262,15 @@
   }
 
   .ac-dot:hover { transform: scale(1.18); }
+
+  /* Glass swatch — frosted look */
+  .ac-dot--glass {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.75) 0%, rgba(200,220,255,.45) 50%, rgba(255,255,255,.6) 100%) !important;
+    border: 1px solid rgba(180,200,255,.5);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,.8), 0 1px 3px rgba(0,0,0,.15);
+    color: rgba(0,0,0,.55);
+  }
 
   .ac-dot--selected {
     box-shadow:

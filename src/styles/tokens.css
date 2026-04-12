@@ -76,14 +76,19 @@
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.7);
-  --shadow-win: 0 32px 100px rgba(0, 0, 0, 0.8),
-                0 0 0 0.5px rgba(255, 255, 255, 0.1);
+  --shadow-win: 0 12px 40px rgba(0, 0, 0, 0.55),
+                0 0 0 0.5px rgba(255, 255, 255, 0.08);
 
   /* ── TRANSITIONS ── */
   --transition-fast:   all 0.15s ease;
   --transition-base:   all 0.25s ease;
   --transition-slow:   all 0.4s ease;
   --transition-spring: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── ACTION CENTER SYSTEM COLORS ── */
+  --system-color-light-hsl:   0, 0%, 100%;
+  --system-color-dark-hsl:    0, 0%, 0%;
+  --system-color-primary-hsl: 211, 100%, 50%;
 
   /* ── MACOS SPECIFIC ── */
   --menubar-height: 28px;
@@ -118,6 +123,6 @@ body.light {
   --shadow-sm:  0 4px 16px rgba(0, 0, 0, 0.10);
   --shadow-md:  0 12px 40px rgba(0, 0, 0, 0.15);
   --shadow-lg:  0 24px 80px rgba(0, 0, 0, 0.18);
-  --shadow-win: 0 32px 100px rgba(0, 0, 0, 0.18),
-                0 0 0 0.5px rgba(0, 0, 0, 0.10);
+  --shadow-win: 0 8px 28px rgba(0, 0, 0, 0.14),
+                0 0 0 0.5px rgba(0, 0, 0, 0.08);
 }

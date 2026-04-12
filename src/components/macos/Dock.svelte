@@ -7,6 +7,7 @@
     { id: 'about',    img: '/icons/about.png',    label: 'About Me' },
     { id: 'design',   img: '/icons/design.png',   label: 'Design'   },
     { id: 'skills',   img: '/icons/skills.png',   label: 'Skills'   },
+    { id: 'engineer', img: '/icons/engineer.png', label: 'Engineer' },
     { id: 'projects', img: '/icons/projects.png', label: 'Projects' },
     { id: 'blog',     img: '/icons/blog.png',     label: 'Blog'     },
     

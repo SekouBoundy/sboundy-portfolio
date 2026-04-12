@@ -74,12 +74,21 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     border: .5px solid rgba(255,255,255,.1);
-    box-shadow: var(--shadow-win);
+    box-shadow:
+      0 12px 40px rgba(0,0,0,.55),
+      0 0 0 .5px rgba(255,255,255,.08);
     transition:
       border-radius .2s ease,
       box-shadow .2s ease;
     min-width: 400px;
     min-height: 300px;
+  }
+
+  :global(body.light) .win {
+    border-color: rgba(0,0,0,.10);
+    box-shadow:
+      0 8px 28px rgba(0,0,0,.14),
+      0 0 0 .5px rgba(0,0,0,.08);
   }
 
   .win--maximized {
@@ -91,34 +100,30 @@
     cursor: grabbing !important;
     user-select: none;
     box-shadow:
-      0 40px 120px rgba(0,0,0,.9),
+      0 24px 60px rgba(0,0,0,.5),
       0 0 0 .5px rgba(255,255,255,.15);
   }
 
-  /* Chrome */
+  /* Chrome — tinted with system color */
   .win-chrome {
     height: 40px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     padding: 0 12px;
-    background: var(--win-chrome-bg, rgba(16, 11, 27, 0.92));
+    background: color-mix(in srgb, hsl(var(--system-color-primary-hsl)) 22%, rgba(18,18,18,.92));
     backdrop-filter: blur(20px);
-    border-bottom: .5px solid var(--win-chrome-border, rgba(255,255,255,.08));
+    border-bottom: .5px solid hsla(var(--system-color-primary-hsl), .2);
     cursor: grab !important;
     user-select: none;
   }
 
-  .win-chrome:active {
-    cursor: grabbing !important;
-  }
-
   :global(body.light) .win-chrome {
-    --win-chrome-bg: rgba(225, 215, 255, .92);
-    --win-chrome-border: rgba(0,0,0,.08);
+    background: color-mix(in srgb, hsl(var(--system-color-primary-hsl)) 16%, rgba(245,245,245,.94));
+    border-bottom-color: hsla(var(--system-color-primary-hsl), .22);
   }
 
-  .win-chrome:active { cursor: grabbing; }
+  .win-chrome:active { cursor: grabbing !important; }
 
   .win-chrome__spacer { width: 52px; flex-shrink: 0; }
 
@@ -166,17 +171,18 @@
   .tl--min::after   { content: '−'; font-size: 10px; }
   .tl--max::after   { content: '+'; font-size: 10px; }
 
-  /* Content */
+  /* Content — solid enough to read, tinted with system color */
   .win-content {
     flex: 1;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: var(--win-content-bg, rgba(0, 0, 0, 0.5));
-    backdrop-filter: blur(30px);
+    background: color-mix(in srgb, hsl(var(--system-color-primary-hsl)) 10%, rgba(15,15,15,.82));
+    backdrop-filter: blur(40px) saturate(140%);
   }
 
   :global(body.light) .win-content {
-    --win-content-bg: rgba(255, 255, 255, 0.5);
+    background: color-mix(in srgb, hsl(var(--system-color-primary-hsl)) 7%, rgba(252,252,252,.88));
+    backdrop-filter: blur(40px) saturate(140%);
   }
 </style>

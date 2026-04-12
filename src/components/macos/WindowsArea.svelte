@@ -14,6 +14,7 @@
     design:   { title: 'Design — SBOUNDY',   component: () => import('../windows/Design.svelte')   },
     contact:  { title: "Let's talk.",        component: () => import('../windows/Contact.svelte')  },
     trash:    { title: 'Trash — Graveyard', component: () => import('../windows/Trash.svelte')    },
+    engineer: { title: 'Engineer — SBOUNDY', component: () => import('../windows/Engineer.svelte') },
   }
 
   const WIN_IDS = Object.keys(WIN_CONFIG) as WinID[]
