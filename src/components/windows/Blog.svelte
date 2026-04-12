@@ -1,5 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { currentLang } from '../../stores/index'
+  import { content as en } from '../../data/content.en.js'
+  import { content as fr } from '../../data/content.fr.js'
+
+  const translations: Record<string, typeof en> = { en, fr }
 
   type Post = {
     id:      number
@@ -11,49 +16,22 @@
     outline: string[]
   }
 
-  const posts: Post[] = [
-    {
-      id: 1, cat: 'Dev',
-      title:   'Building your first Flutter app from scratch',
-      excerpt: 'From zero to a working mobile app — structure, state, and shipping.',
-      date: 'Coming soon', read: '8 min',
-      outline: ['01 — Setting up Flutter & the project structure', '02 — Widgets, state & the build method', '03 — Navigation between screens', '04 — Connecting to an API', '05 — Building & shipping to the store'],
-    },
-    {
-      id: 2, cat: 'Design',
-      title:   'How I design mobile UIs in Figma',
-      excerpt: 'My personal workflow — components, auto-layout, and handoff tips.',
-      date: 'Coming soon', read: '6 min',
-      outline: ['01 — Starting with a moodboard', '02 — Setting up components & tokens', '03 — Auto-layout tricks I use every day', '04 — Prototyping the key flows', '05 — Handing off to dev without pain'],
-    },
-    {
-      id: 3, cat: 'Dev',
-      title:   'React vs React Native — what you actually need to know',
-      excerpt: 'Not just a comparison. A real guide for someone coming from web.',
-      date: 'Coming soon', read: '5 min',
-      outline: ['01 — What they share (and what they don\'t)', '02 — Styling: CSS vs StyleSheet', '03 — Navigation differences', '04 — When to pick which', '05 — My honest take'],
-    },
-    {
-      id: 4, cat: 'Design',
-      title:   'Creating a visual identity from scratch',
-      excerpt: 'Logo, colors, type — how I approach brand design for small projects.',
-      date: 'Coming soon', read: '7 min',
-      outline: ['01 — Discovery: understanding the brand', '02 — Choosing a type direction', '03 — Building the color system', '04 — Logo construction', '05 — Delivering the identity kit'],
-    },
-    {
-      id: 5, cat: 'Dev',
-      title:   'Svelte 5 runes — a practical intro',
-      excerpt: 'What changed, what stayed, and why runes actually make sense.',
-      date: 'Coming soon', read: '6 min',
-      outline: ['01 — What are runes?', '02 — $state vs the old store system', '03 — $derived & $effect in practice', '04 — Props & snippets', '05 — Should you migrate now?'],
-    },
-  ]
+  const posts = $derived(translations[$currentLang].blog.posts as Post[])
+  const blogUI = $derived(translations[$currentLang].blog.ui)
 
   const categories = ['All', 'Dev', 'Design'] as const
   type Cat = typeof categories[number]
 
   let activecat: Cat = $state('All')
   let selected: Post | null = $state(null)
+
+  // When lang changes, refresh selected post to get translated content
+  $effect(() => {
+    if (selected !== null) {
+      const id = selected.id
+      selected = posts.find(p => p.id === id) ?? null
+    }
+  })
 
   // mode derived from selection or active filter
   const mode = $derived((() => {
@@ -145,7 +123,8 @@
   }
 
   function fmtDate(ts: number) {
-    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const locale = $currentLang === 'fr' ? 'fr-FR' : 'en-US'
+    return new Date(ts).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
   }
 </script>
 
@@ -180,7 +159,7 @@
 
     {:else if mode === 'design'}
       <!-- DESIGN sidebar — editorial style -->
-      <p class="design-sidebar-label">SECTIONS</p>
+      <p class="design-sidebar-label">{blogUI.sections}</p>
       {#each categories as cat}
         <button
           class="design-sidebar-item"
@@ -192,11 +171,11 @@
         </button>
       {/each}
       <div class="design-sidebar-divider"></div>
-      <p class="design-sidebar-note">Design thinking,<br/>written down.</p>
+      <p class="design-sidebar-note">{@html blogUI.designNote.replace('\n', '<br/>')}</p>
 
     {:else}
       <!-- ALL — neutral sidebar -->
-      <p class="sidebar-label">CATEGORIES</p>
+      <p class="sidebar-label">{blogUI.categories}</p>
       {#each categories as cat}
         <button
           class="sidebar-item"
@@ -209,7 +188,7 @@
         </button>
       {/each}
       <div class="sidebar-divider"></div>
-      <p class="sidebar-note">Dev · Design · Both.</p>
+      <p class="sidebar-note">{blogUI.allNote}</p>
     {/if}
 
   </aside>

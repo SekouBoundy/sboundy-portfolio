@@ -1,4 +1,11 @@
 <script lang="ts">
+  import { currentLang } from '../../stores/index'
+  import { content as en } from '../../data/content.en.js'
+  import { content as fr } from '../../data/content.fr.js'
+
+  const translations: Record<string, typeof en> = { en, fr }
+  const c = $derived(translations[$currentLang].contact)
+
   let name    = $state('')
   let email   = $state('')
   let message = $state('')
@@ -31,8 +38,8 @@
     <div class="aside-watermark" aria-hidden="true">TALK</div>
 
     <div class="aside-content">
-      <h2 class="aside-title">Let's<br/>talk.</h2>
-      <p class="aside-sub">Have a project, a collab idea, or just want to say hi — reach out.</p>
+      <h2 class="aside-title">{@html c.title.replace('.', '.<br/>')}</h2>
+      <p class="aside-sub">{c.subtitle}</p>
 
       <div class="aside-links">
         {#each links as link}
@@ -52,10 +59,10 @@
     {#if sent}
       <div class="sent-state" style="animation: panelIn .3s ease">
         <div class="sent-icon">✓</div>
-        <h3 class="sent-title">Message sent.</h3>
-        <p class="sent-sub">I'll get back to you soon.</p>
+        <h3 class="sent-title">{c.sent.title}</h3>
+        <p class="sent-sub">{c.sent.sub}</p>
         <button class="sent-reset" onclick={() => { sent = false; name = ''; email = ''; message = '' }}>
-          Send another →
+          {c.sent.again}
         </button>
       </div>
 
@@ -66,19 +73,19 @@
         style="animation: panelIn .2s ease"
       >
         <div class="form-group">
-          <label class="form-label" for="cf-name">Name</label>
+          <label class="form-label" for="cf-name">{c.form.name}</label>
           <input
             id="cf-name"
             class="form-input"
             type="text"
-            placeholder="Your name"
+            placeholder={c.form.namePlaceholder}
             bind:value={name}
             required
           />
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="cf-email">Email</label>
+          <label class="form-label" for="cf-email">{c.form.email}</label>
           <input
             id="cf-email"
             class="form-input"
@@ -90,11 +97,11 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="cf-msg">Message</label>
+          <label class="form-label" for="cf-msg">{c.form.message}</label>
           <textarea
             id="cf-msg"
             class="form-input form-textarea"
-            placeholder="What's on your mind?"
+            placeholder={c.form.messagePlaceholder}
             rows="5"
             bind:value={message}
             required
@@ -111,7 +118,7 @@
             <span class="submit-dot"></span>
             <span class="submit-dot"></span>
           {:else}
-            Send message →
+            {c.form.submit}
           {/if}
         </button>
       </form>

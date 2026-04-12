@@ -1,45 +1,31 @@
 <script lang="ts">
+  import { currentLang } from '../../stores/index'
+  import { content as en } from '../../data/content.en.js'
+  import { content as fr } from '../../data/content.fr.js'
+
+  const translations: Record<string, typeof en> = { en, fr }
+
   let step = $state(0)
   let showCursor = $state(true)
 
   const PROMPT = 'sboundy@portfolio ~ %'
 
-  const sections = [
+  const sections = $derived([
     {
       cmd: 'sboundy skills --list',
-      groups: [
-        {
-          label: 'DEVELOPMENT',
-          items: [
-            { skill: 'React',        desc: 'Web apps & SPAs' },
-            { skill: 'Flutter',      desc: 'Cross-platform mobile' },
-            { skill: 'React Native', desc: 'Mobile (iOS & Android)' },
-            { skill: 'Svelte',       desc: 'Fast, modern web UIs' },
-            { skill: 'HTML / CSS / JS', desc: 'Web fundamentals' },
-          ],
-        },
-        {
-          label: 'DESIGN & UI',
-          items: [
-            { skill: 'Figma',        desc: 'UI/UX & Prototyping' },
-            { skill: 'Web Mockups',  desc: 'Full design systems' },
-            { skill: 'Mobile Design',desc: 'iOS & Android UX' },
-          ],
-        },
-        {
-          label: 'CREATIVE',
-          items: [
-            { skill: 'Hand Drawing', desc: 'Illustration & sketches' },
-            { skill: 'Graphic Design', desc: 'Flyers & visual identity' },
-          ],
-        },
-      ],
+      groups: translations[$currentLang].skills.groups,
     },
     {
       cmd: 'sboundy --status',
-      output: 'Student | Open to work | Based in Mali | FR · EN',
+      output: translations[$currentLang].skills.status,
     },
-  ]
+  ])
+
+  // Reset animation when language changes
+  $effect(() => {
+    void $currentLang
+    step = 0
+  })
 
   // Animate sections in sequence
   $effect(() => {
@@ -58,16 +44,21 @@
   })
 
   // Total steps: 1 (first cmd) + groups*items + 1 (second cmd) + 1 (status)
-  const totalGroups = sections[0].groups!
-  let groupSteps: number[] = []
-  let acc = 1 // step 0 = first cmd typed
-  for (const g of totalGroups) {
-    groupSteps.push(acc)
-    acc += 1 + g.items.length // 1 for label + items
-  }
-  const secondCmdStep = acc
-  const statusStep = acc + 1
-  const doneStep = acc + 2
+  const stepCalc = $derived((() => {
+    const groups = sections[0].groups!
+    const steps: number[] = []
+    let acc = 1
+    for (const g of groups) {
+      steps.push(acc)
+      acc += 1 + g.items.length
+    }
+    return { groupSteps: steps, secondCmdStep: acc, statusStep: acc + 1, doneStep: acc + 2 }
+  })())
+
+  const groupSteps    = $derived(stepCalc.groupSteps)
+  const secondCmdStep = $derived(stepCalc.secondCmdStep)
+  const statusStep    = $derived(stepCalc.statusStep)
+  const doneStep      = $derived(stepCalc.doneStep)
 
   function visible(minStep: number) {
     return step >= minStep

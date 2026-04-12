@@ -1,7 +1,11 @@
-<script>
-  import { content } from '../../data/content.en.js'
+<script lang="ts">
+  import { currentLang } from '../../stores/index'
+  import { content as en } from '../../data/content.en.js'
+  import { content as fr } from '../../data/content.fr.js'
 
-  const { about } = content
+  const translations: Record<string, typeof en> = { en, fr }
+
+  const about = $derived(translations[$currentLang].about)
 
   let activeTab = $state('profile')
 
@@ -19,11 +23,11 @@
     { icon: 'in', label: 'LinkedIn',            href: '#' },
   ]
 
-  const tabs = [
-    { id: 'profile', label: 'Profile' },
-    { id: 'stack',   label: 'Tech Stack' },
-    { id: 'journey', label: 'Journey' },
-  ]
+  const tabs = $derived([
+    { id: 'profile', label: about.tabs.profile },
+    { id: 'stack',   label: about.tabs.stack   },
+    { id: 'journey', label: about.tabs.journey },
+  ])
 </script>
 
 <div class="about-layout">
@@ -304,11 +308,9 @@
   width: 105px;
   height: 145px;
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
-  border: var(--border-subtle);
   background: var(--color-surface);
-  box-shadow: 0 8px 32px rgba(139,92,246,.2);
 }
 
 .about-photo img {
@@ -316,6 +318,21 @@
   height: 100%;
   object-fit: cover;
   object-position: top;
+  border-radius: var(--radius-md);
+  border: var(--border-subtle);
+  box-shadow: 0 8px 32px rgba(139,92,246,.2);
+  transition: transform .35s cubic-bezier(0.34,1.56,0.64,1), box-shadow .35s ease;
+  display: block;
+  cursor: zoom-in;
+  transform-origin: top left;
+  position: relative;
+  z-index: 1;
+}
+
+.about-photo img:hover {
+  transform: scale(2) translate(10px, 8px);
+  box-shadow: 0 24px 64px rgba(139,92,246,.45);
+  z-index: 20;
 }
 
 
