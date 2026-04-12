@@ -3,6 +3,7 @@
   import { wins }    from '$state/windows.svelte.ts'
   import Window      from './Window.svelte'
   import type { WinID } from '$state/windows.svelte.ts'
+  import { SvelteSet } from 'svelte/reactivity'
 
   // App windows — each maps an id to its title + content component
   // We lazy-import content so unused windows cost zero on load
@@ -18,11 +19,19 @@
   }
 
   const WIN_IDS = Object.keys(WIN_CONFIG) as WinID[]
+
+  // Once a window has been opened, keep it mounted so out-transitions can play.
+  // The Window component's internal {#if} handles show/hide with animation.
+  const mounted = new SvelteSet<WinID>()
+
+  $effect(() => {
+    WIN_IDS.forEach(id => { if (wins[id].open) mounted.add(id) })
+  })
 </script>
 
 <div id="windows-area">
   {#each WIN_IDS as id (id)}
-    {#if wins[id].open}
+    {#if mounted.has(id)}
       <Window {id} title={WIN_CONFIG[id].title}>
         {#await WIN_CONFIG[id].component() then { default: C }}
           <C />

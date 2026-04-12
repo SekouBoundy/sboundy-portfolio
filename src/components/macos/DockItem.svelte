@@ -50,7 +50,7 @@
   }
 </script>
 
-<button class="dock-item" onclick={onClick} aria-label={item.label}>
+<button class="dock-item" onclick={onClick} aria-label={item.label} data-win-id={item.id ?? ''}>
   <span class="dock-label">{item.label}</span>
 
   <div

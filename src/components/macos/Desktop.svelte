@@ -31,7 +31,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow: clip; /* clip instead of hidden — doesn't create a scroll container, lets transforms overflow during animations */
   }
 
   .desktop-icons {
