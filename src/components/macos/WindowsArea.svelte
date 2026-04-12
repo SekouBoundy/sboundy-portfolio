@@ -13,6 +13,7 @@
     blog:     { title: 'Blog — Notes',       component: () => import('../windows/Blog.svelte')     },
     design:   { title: 'Design — SBOUNDY',   component: () => import('../windows/Design.svelte')   },
     contact:  { title: "Let's talk.",        component: () => import('../windows/Contact.svelte')  },
+    trash:    { title: 'Trash — Graveyard', component: () => import('../windows/Trash.svelte')    },
   }
 
   const WIN_IDS = Object.keys(WIN_CONFIG) as WinID[]

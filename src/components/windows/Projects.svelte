@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { projects } from '../../data/projects.js'
+  import { projects } from '../../data/projects.ts'
 
   type Project = typeof projects[0]
 

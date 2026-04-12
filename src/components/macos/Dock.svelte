@@ -12,13 +12,13 @@
     
     { separator: true, label: '' },
     { id: 'contact', img: '/icons/contact.png', label: 'Contact' },
-    { img: '/icons/trash.png',  label: 'Trash'  },
+    { id: 'trash', img: '/icons/trash.png', label: 'Trash' },
   ]
 
   let mouse_x = $state<number | null>(null)
 </script>
 
-<div id="dock"
+<div id="dock" role="presentation"
   onmousemove={(e) => (mouse_x = e.clientX)}
   onmouseleave={() => (mouse_x = null)}
 >

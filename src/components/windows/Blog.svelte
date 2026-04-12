@@ -56,13 +56,13 @@
   let selected: Post | null = $state(null)
 
   // mode derived from selection or active filter
-  const mode = $derived<'dev' | 'design' | 'all'>(
-    selected
-      ? selected.cat === 'Dev' ? 'dev' : 'design'
-      : activecat === 'Dev'    ? 'dev'
-      : activecat === 'Design' ? 'design'
-      : 'all'
-  )
+  const mode = $derived((() => {
+    const s = selected
+    if (s !== null) return s.cat === 'Dev' ? 'dev' : 'design'
+    if (activecat === 'Dev')    return 'dev'
+    if (activecat === 'Design') return 'design'
+    return 'all'
+  })())
 
   let likes:    Record<number, number>                                      = $state({})
   let liked:    Record<number, boolean>                                     = $state({})

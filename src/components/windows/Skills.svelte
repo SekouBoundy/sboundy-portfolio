@@ -151,38 +151,6 @@
   overflow: hidden;
 }
 
-/* Title bar */
-.term-bar {
-  display: flex;
-  align-items: center;
-  gap: .6rem;
-  padding: .5rem 1rem;
-  background: #1a1a1a;
-  border-bottom: .5px solid rgba(255,255,255,.06);
-  flex-shrink: 0;
-}
-
-.term-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-.dot--red    { background: #FF5F57; }
-.dot--yellow { background: #FEBC2E; }
-.dot--green  { background: #28C840; }
-
-.term-title {
-  flex: 1;
-  text-align: center;
-  font-size: .72rem;
-  color: rgba(255,255,255,.4);
-  letter-spacing: .02em;
-}
 
 /* Body */
 .term-body {
