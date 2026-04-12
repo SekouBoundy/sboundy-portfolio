@@ -13,6 +13,7 @@ export default defineConfig({
       '$components': resolve(__dirname, 'src/components'),
       '$data':       resolve(__dirname, 'src/data'),
       '$utils':      resolve(__dirname, 'src/utils'),
+      '$lib':        resolve(__dirname, 'src/lib'),
     }
   }
 })

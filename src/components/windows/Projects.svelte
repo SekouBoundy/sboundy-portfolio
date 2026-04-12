@@ -1,12 +1,42 @@
 <script lang="ts">
-  import { projects } from '../../data/projects.ts'
+  import { supabase } from '$lib/supabase.js'
+  import { currentLang } from '../../stores/index'
 
-  type Project = typeof projects[0]
+  type Project = {
+    id: string
+    name: string
+    desc_en: string
+    desc_fr: string
+    thumb: string
+    thumb_url: string | null
+    color: string
+    url: string | null
+    year: number
+    role: string
+    tags: string[]
+    screenshots: string[]
+  }
 
-  const allTags = ['All', ...Array.from(new Set(projects.flatMap(p => p.tags)))]
-
+  let projects  = $state<Project[]>([])
+  let loading   = $state(true)
   let activeTag = $state('All')
   let selected: Project | null = $state(null)
+  let lang = $state('en')
+
+  currentLang.subscribe(v => lang = v)
+
+  $effect(() => {
+    supabase
+      .from('projects')
+      .select('*')
+      .order('order_index')
+      .then(({ data }: { data: Project[] | null }) => {
+        projects = data ?? []
+        loading  = false
+      })
+  })
+
+  const allTags = $derived(['All', ...Array.from(new Set(projects.flatMap(p => p.tags)))])
 
   const filtered = $derived(
     activeTag === 'All'
@@ -18,8 +48,11 @@
     return tag === 'All' ? projects.length : projects.filter(p => p.tags.includes(tag)).length
   }
 
-  function open(p: Project) { selected = p }
-  function close() { selected = null }
+  function desc(p: Project) { return lang === 'fr' ? p.desc_fr : p.desc_en }
+  function open(p: Project)  { selected = p; lightbox = null }
+  function close()            { selected = null; lightbox = null }
+
+  let lightbox: string | null = $state(null)
 </script>
 
 <div class="proj-layout">
@@ -44,13 +77,22 @@
   <main class="proj-main">
     <div class="proj-watermark" aria-hidden="true">WORK</div>
 
-    {#if selected}
+    {#if loading}
+      <div class="proj-loading">Loading…</div>
+    {:else if selected}
       <!-- Detail panel -->
       <div class="proj-detail" style="animation: panelIn .2s ease">
         <button class="detail-back" onclick={close}>← Back</button>
 
         <div class="detail-thumb" style="background: {selected.color}">
-          <span class="detail-thumb__text">{selected.thumb}</span>
+          {#if selected.thumb_url}
+            <button class="detail-thumb__btn" onclick={() => lightbox = selected!.thumb_url}>
+              <img class="detail-thumb__img" src={selected.thumb_url} alt={selected.name} />
+              <span class="detail-thumb__hint">⤢ Expand</span>
+            </button>
+          {:else}
+            <span class="detail-thumb__text">{selected.thumb}</span>
+          {/if}
         </div>
 
         <div class="detail-meta">
@@ -68,15 +110,35 @@
             {/if}
           </div>
 
-          <p class="detail-desc">{selected.desc}</p>
+          <p class="detail-desc">{desc(selected)}</p>
 
           <div class="detail-tags">
             {#each selected.tags as tag}
               <span class="tag">{tag}</span>
             {/each}
           </div>
+
+          {#if selected.screenshots?.length}
+            <div class="detail-screenshots">
+              <p class="screenshots-label">SCREENSHOTS</p>
+              <div class="screenshots-strip">
+                {#each selected.screenshots as shot}
+                  <button class="screenshot-thumb" onclick={() => lightbox = shot}>
+                    <img src={shot} alt="screenshot" />
+                  </button>
+                {/each}
+              </div>
+            </div>
+          {/if}
         </div>
       </div>
+
+      <!-- Lightbox -->
+      {#if lightbox}
+        <button class="lightbox" onclick={() => lightbox = null}>
+          <img src={lightbox} alt="screenshot preview" />
+        </button>
+      {/if}
 
     {:else}
       <!-- Card grid -->
@@ -88,7 +150,11 @@
             style="animation: panelIn .15s ease"
           >
             <div class="proj-card__thumb" style="background: {project.color}">
-              <span class="proj-card__thumb-text">{project.thumb}</span>
+              {#if project.thumb_url}
+                <img class="proj-card__thumb-img" src={project.thumb_url} alt={project.name} />
+              {:else}
+                <span class="proj-card__thumb-text">{project.thumb}</span>
+              {/if}
               <div class="proj-card__overlay">
                 <span class="proj-card__cta">View →</span>
               </div>
@@ -254,6 +320,14 @@
   overflow: hidden;
 }
 
+.proj-card__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
 .proj-card__thumb-text {
   font-family: var(--font-display);
   font-size: 2.8rem;
@@ -346,6 +420,49 @@
   border: var(--border-subtle);
 }
 
+.detail-thumb__btn {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: zoom-in;
+  display: block;
+}
+
+.detail-thumb__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+}
+
+.detail-thumb__btn:hover .detail-thumb__img {
+  opacity: .75;
+}
+
+.detail-thumb__hint {
+  position: absolute;
+  bottom: .6rem;
+  right: .7rem;
+  font-size: .7rem;
+  font-weight: var(--fw-medium);
+  color: #fff;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  opacity: 0;
+  transition: var(--transition-fast);
+  pointer-events: none;
+}
+
+.detail-thumb__btn:hover .detail-thumb__hint {
+  opacity: 1;
+}
+
 .detail-thumb__text {
   font-family: var(--font-display);
   font-size: 5rem;
@@ -436,6 +553,87 @@
 .tag--sm {
   font-size: .62rem;
   padding: 2px 8px;
+}
+
+/* Screenshots */
+.detail-screenshots {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.screenshots-label {
+  font-size: .6rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: .12em;
+  color: var(--color-secondary);
+  opacity: .7;
+}
+
+.screenshots-strip {
+  display: flex;
+  gap: .6rem;
+  overflow-x: auto;
+  padding-bottom: .4rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.1) transparent;
+}
+
+.screenshot-thumb {
+  flex-shrink: 0;
+  width: 120px;
+  height: 80px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--border-subtle);
+  background: rgba(255,255,255,.04);
+  padding: 0;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.screenshot-thumb:hover {
+  border-color: rgba(139,92,246,.5);
+  transform: scale(1.03);
+}
+
+.screenshot-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Lightbox */
+.lightbox {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border: none;
+  cursor: zoom-out;
+  padding: 1.5rem;
+}
+
+.lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: 0 24px 64px rgba(0,0,0,.8);
+}
+
+.proj-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: .85rem;
+  color: var(--color-secondary);
+  opacity: .6;
 }
 
 @keyframes panelIn {

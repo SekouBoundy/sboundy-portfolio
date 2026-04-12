@@ -1,96 +1,154 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { supabase } from '$lib/supabase.js'
   import { currentLang } from '../../stores/index'
-  import { content as en } from '../../data/content.en.js'
-  import { content as fr } from '../../data/content.fr.js'
-
-  const translations: Record<string, typeof en> = { en, fr }
 
   type Post = {
-    id:      number
-    cat:     'Dev' | 'Design'
-    title:   string
-    excerpt: string
-    date:    string
-    read:    string
-    outline: string[]
+    id:       string
+    cat:      'Dev' | 'Design'
+    title_en: string
+    title_fr: string
+    body_en:  string
+    body_fr:  string
+    read:     string
+    outline:  string[]
+    created_at: string
   }
 
-  const posts = $derived(translations[$currentLang].blog.posts as Post[])
-  const blogUI = $derived(translations[$currentLang].blog.ui)
+  type Comment = { id: string; author: string; text: string; created_at: string }
 
   const categories = ['All', 'Dev', 'Design'] as const
   type Cat = typeof categories[number]
 
-  let activecat: Cat = $state('All')
-  let selected: Post | null = $state(null)
+  let lang       = $state('en')
+  let posts      = $state<Post[]>([])
+  let loading    = $state(true)
+  let activecat  = $state<Cat>('All')
+  let selected   = $state<Post | null>(null)
 
-  // When lang changes, refresh selected post to get translated content
-  $effect(() => {
-    if (selected !== null) {
-      const id = selected.id
-      selected = posts.find(p => p.id === id) ?? null
-    }
-  })
+  // likes: postId → count
+  let likeCounts = $state<Record<string, number>>({})
+  // whether current visitor liked each post
+  let liked      = $state<Record<string, boolean>>({})
+  // comments per post
+  let comments   = $state<Record<string, Comment[]>>({})
 
-  // mode derived from selection or active filter
-  const mode = $derived((() => {
-    const s = selected
-    if (s !== null) return s.cat === 'Dev' ? 'dev' : 'design'
-    if (activecat === 'Dev')    return 'dev'
-    if (activecat === 'Design') return 'design'
-    return 'all'
-  })())
-
-  let likes:    Record<number, number>                                      = $state({})
-  let liked:    Record<number, boolean>                                     = $state({})
-  let comments: Record<number, {author: string; text: string; ts: number}[]> = $state({})
   let newComment  = $state('')
   let authorName  = $state('')
   let showToast   = $state(false)
   let toastMsg    = $state('')
   let outlineStep = $state(0)
+  let submitting  = $state(false)
 
-  onMount(() => {
-    likes    = JSON.parse(localStorage.getItem('blog_likes')    || '{}')
-    liked    = JSON.parse(localStorage.getItem('blog_liked')    || '{}')
-    comments = JSON.parse(localStorage.getItem('blog_comments') || '{}')
+  // fingerprint — anonymous visitor ID
+  let fingerprint = ''
+
+  currentLang.subscribe(v => lang = v)
+
+  $effect(() => {
+    fingerprint = localStorage.getItem('_fp') ?? (() => {
+      const id = crypto.randomUUID()
+      localStorage.setItem('_fp', id)
+      return id
+    })()
+
+    supabase
+      .from('posts')
+      .select('id, cat, title_en, title_fr, body_en, body_fr, read, outline, created_at')
+      .eq('published', true)
+      .then(({ data }: { data: Post[] | null }) => {
+        posts   = data ?? []
+        loading = false
+        loadReactions(posts.map(p => p.id))
+      })
   })
 
-  function saveLikes()    { localStorage.setItem('blog_likes',    JSON.stringify(likes))    }
-  function saveLiked()    { localStorage.setItem('blog_liked',    JSON.stringify(liked))    }
-  function saveComments() { localStorage.setItem('blog_comments', JSON.stringify(comments)) }
+  async function loadReactions(ids: string[]) {
+    if (!ids.length) return
 
-  function getLikes(id: number)    { return likes[id]    ?? 0 }
-  function isLiked(id: number)     { return liked[id]    ?? false }
-  function getComments(id: number) { return comments[id] ?? [] }
+    // likes counts
+    const { data: lk } = await supabase
+      .from('post_likes')
+      .select('post_id')
+      .in('post_id', ids)
 
-  function toggleLike(id: number) {
-    if (liked[id]) {
-      likes[id] = Math.max(0, (likes[id] ?? 1) - 1)
-      liked[id] = false
-    } else {
-      likes[id] = (likes[id] ?? 0) + 1
-      liked[id] = true
+    const counts: Record<string, number> = {}
+    const myLikes: Record<string, boolean> = {}
+    for (const row of (lk ?? [])) {
+      counts[row.post_id] = (counts[row.post_id] ?? 0) + 1
     }
-    saveLikes(); saveLiked()
-    likes = { ...likes }
-    liked = { ...liked }
+    // check which ones current visitor liked
+    const { data: mine } = await supabase
+      .from('post_likes')
+      .select('post_id')
+      .in('post_id', ids)
+      .eq('fingerprint', fingerprint)
+
+    for (const row of (mine ?? [])) myLikes[row.post_id] = true
+
+    likeCounts = counts
+    liked      = myLikes
   }
 
-  function addComment(id: number) {
+  async function loadComments(postId: string) {
+    const { data } = await supabase
+      .from('post_comments')
+      .select('id, author, text, created_at')
+      .eq('post_id', postId)
+      .order('created_at')
+    comments = { ...comments, [postId]: data ?? [] }
+  }
+
+  async function toggleLike(postId: string) {
+    if (liked[postId]) {
+      await supabase.from('post_likes').delete()
+        .eq('post_id', postId).eq('fingerprint', fingerprint)
+      likeCounts = { ...likeCounts, [postId]: Math.max(0, (likeCounts[postId] ?? 1) - 1) }
+      liked      = { ...liked, [postId]: false }
+    } else {
+      await supabase.from('post_likes').insert({ post_id: postId, fingerprint })
+      likeCounts = { ...likeCounts, [postId]: (likeCounts[postId] ?? 0) + 1 }
+      liked      = { ...liked, [postId]: true }
+    }
+  }
+
+  async function addComment(postId: string) {
     const text   = newComment.trim()
     const author = authorName.trim() || 'Anonymous'
-    if (!text) return
-    if (!comments[id]) comments[id] = []
-    comments[id] = [...comments[id], { author, text, ts: Date.now() }]
-    saveComments()
-    comments    = { ...comments }
-    newComment  = ''
+    if (!text || submitting) return
+    submitting = true
+    await supabase.from('post_comments').insert({ post_id: postId, author, text })
+    await loadComments(postId)
+    newComment = ''
+    submitting = false
+    toast('Comment posted ✓')
+  }
+
+  function title(p: Post)   { return lang === 'fr' ? p.title_fr : p.title_en }
+  function excerpt(p: Post) { return lang === 'fr' ? p.body_fr  : p.body_en  }
+
+  function getLikes(id: string)    { return likeCounts[id] ?? 0 }
+  function isLiked(id: string)     { return liked[id] ?? false }
+  function getComments(id: string) { return comments[id] ?? [] }
+
+  const blogUI = { categories: 'CATEGORIES', sections: 'SECTIONS', designNote: 'Design thinking,\nwritten down.', allNote: 'Dev · Design · Both.', comingSoon: 'Coming soon' }
+
+  const mode = $derived((() => {
+    if (selected !== null) return selected.cat === 'Dev' ? 'dev' : 'design'
+    if (activecat === 'Dev')    return 'dev'
+    if (activecat === 'Design') return 'design'
+    return 'all'
+  })())
+
+  const filtered = $derived(
+    activecat === 'All' ? posts : posts.filter(p => p.cat === activecat)
+  )
+
+  function catCount(c: Cat) {
+    return c === 'All' ? posts.length : posts.filter(p => p.cat === c).length
   }
 
   function share(post: Post) {
-    navigator.clipboard.writeText(`"${post.title}" — sboundy.com`).catch(() => {})
+    navigator.clipboard.writeText(`"${title(post)}" — sboundy.com`).catch(() => {})
     toast('Link copied ✓')
   }
 
@@ -103,6 +161,7 @@
   function openPost(post: Post) {
     selected    = post
     outlineStep = 0
+    loadComments(post.id)
     let i = 0
     const t = setInterval(() => {
       outlineStep = ++i
@@ -114,17 +173,9 @@
     document.querySelector('.article-scroll')?.scrollTo({ top: 99999, behavior: 'smooth' })
   }
 
-  const filtered = $derived(
-    activecat === 'All' ? posts : posts.filter(p => p.cat === activecat)
-  )
-
-  function catCount(c: Cat) {
-    return c === 'All' ? posts.length : posts.filter(p => p.cat === c).length
-  }
-
-  function fmtDate(ts: number) {
-    const locale = $currentLang === 'fr' ? 'fr-FR' : 'en-US'
-    return new Date(ts).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+  function fmtDate(iso: string) {
+    const locale = lang === 'fr' ? 'fr-FR' : 'en-US'
+    return new Date(iso).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
   }
 </script>
 
@@ -213,15 +264,15 @@
               <span class="dot dot--r"></span>
               <span class="dot dot--y"></span>
               <span class="dot dot--g"></span>
-              <span class="dev-term-title">sboundy@portfolio — {selected.title.slice(0,28)}...</span>
+              <span class="dev-term-title">sboundy@portfolio — {title(selected).slice(0,28)}...</span>
             </div>
             <div class="dev-term-body">
               <div class="dev-line">
                 <span class="dev-prompt">sboundy ~ %</span>
-                <span class="dev-cmd"> cat "{selected.title}"</span>
+                <span class="dev-cmd"> cat "{title(selected)}"</span>
               </div>
               <div class="dev-spacer"></div>
-              <div class="dev-line dev-line--comment"># {selected.excerpt}</div>
+              <div class="dev-line dev-line--comment"># {excerpt(selected)}</div>
               <div class="dev-spacer"></div>
               <div class="dev-line dev-line--label">## Table of contents</div>
               {#each selected.outline as line, i}
@@ -268,12 +319,12 @@
 
           <div class="design-article-header">
             <span class="design-cat-label">Design</span>
-            <h1 class="design-article-title">{selected.title}</h1>
-            <p class="design-article-sub">{selected.excerpt}</p>
+            <h1 class="design-article-title">{title(selected)}</h1>
+            <p class="design-article-sub">{excerpt(selected)}</p>
             <div class="design-article-meta">
               <span>{selected.read} read</span>
               <span class="design-dot-sep">·</span>
-              <span>{selected.date}</span>
+              <span>{fmtDate(selected.created_at)}</span>
             </div>
             <button class="design-read-btn" onclick={scrollToBottom}>Read ↓</button>
           </div>
@@ -330,7 +381,7 @@
             <button class="dev-post-row" onclick={() => openPost(post)}>
               <span class="dev-row-perm">-rw-r--r--</span>
               <span class="dev-row-read">{post.read}</span>
-              <span class="dev-row-title">{post.title}</span>
+              <span class="dev-row-title">{title(post)}</span>
               <span class="dev-row-arrow">→</span>
             </button>
           {/each}
@@ -343,10 +394,10 @@
           {#each filtered as post (post.id)}
             <button class="design-post-card" onclick={() => openPost(post)}>
               <div class="design-post-card__inner">
-                <div class="design-post-card__num">0{post.id}</div>
+                <div class="design-post-card__num">{filtered.indexOf(post) + 1}</div>
                 <div class="design-post-card__content">
-                  <h2 class="design-post-title">{post.title}</h2>
-                  <p class="design-post-excerpt">{post.excerpt}</p>
+                  <h2 class="design-post-title">{title(post)}</h2>
+                  <p class="design-post-excerpt">{excerpt(post)}</p>
                   <span class="design-post-meta">{post.read} read</span>
                 </div>
                 <span class="design-post-arrow">↗</span>
@@ -362,8 +413,8 @@
             <button class="post-card" onclick={() => openPost(post)}>
               <div class="post-card__left">
                 <span class="cat-badge cat-badge--{post.cat.toLowerCase()}">{post.cat}</span>
-                <h2 class="post-card__title">{post.title}</h2>
-                <p class="post-card__excerpt">{post.excerpt}</p>
+                <h2 class="post-card__title">{title(post)}</h2>
+                <p class="post-card__excerpt">{excerpt(post)}</p>
               </div>
               <div class="post-card__right">
                 <span class="post-card__read">{post.read}</span>
@@ -385,7 +436,7 @@
 </div>
 
 <!-- ── Shared comments snippet ── -->
-{#snippet commentsBlock(postId: number)}
+{#snippet commentsBlock(postId: string)}
   <div class="comments-section" class:comments-section--design={mode === 'design'}>
     <p class="comments-title">
       Comments
@@ -404,7 +455,7 @@
             <div class="comment-body">
               <div class="comment-header">
                 <span class="comment-author">{c.author}</span>
-                <span class="comment-date">{fmtDate(c.ts)}</span>
+                <span class="comment-date">{fmtDate(c.created_at)}</span>
               </div>
               <p class="comment-text">{c.text}</p>
             </div>
@@ -416,8 +467,8 @@
     <div class="comment-form">
       <input class="comment-input" type="text" placeholder="Your name (optional)" bind:value={authorName} />
       <textarea class="comment-input comment-input--area" placeholder="Leave a thought..." rows="3" bind:value={newComment}></textarea>
-      <button class="comment-submit" onclick={() => addComment(postId)} disabled={!newComment.trim()}>
-        Post comment →
+      <button class="comment-submit" onclick={() => addComment(postId)} disabled={!newComment.trim() || submitting}>
+        {submitting ? 'Posting…' : 'Post comment →'}
       </button>
     </div>
   </div>

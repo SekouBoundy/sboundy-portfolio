@@ -139,7 +139,7 @@
   <About   {active} {timeStr} {t} {back} />
   <Projects {active} {timeStr} {t} {back} />
   <Skills  {active} {timeStr} {t} {back} />
-  <Blog    {active} {timeStr} {t} {back} />
+  <Blog    {active} {timeStr} {back} />
   <Contact {active} {timeStr} {t} {back} />
   <Design  {active} {timeStr} {back} />
   <Photos  {active} {timeStr} {back} />

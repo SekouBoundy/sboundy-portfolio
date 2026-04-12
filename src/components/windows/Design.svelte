@@ -1,5 +1,13 @@
 <script lang="ts">
-  let activeCategory = $state('all')
+  import { supabase } from '$lib/supabase.js'
+
+  type Work = {
+    id: number
+    title: string
+    category: string
+    placeholder: string
+    src: string | null
+  }
 
   const categories = [
     { id: 'all',      label: 'All' },
@@ -8,23 +16,61 @@
     { id: 'drawings', label: 'Drawings' },
   ]
 
-  // Replace src values with your actual image paths
-  const works = [
-    { id: 1, cat: 'flyers',   title: 'Event Flyer',       src: '', placeholder: 'FL' },
-    { id: 2, cat: 'flyers',   title: 'Promo Flyer',       src: '', placeholder: 'FL' },
-    { id: 3, cat: 'mockups',  title: 'MaRevision App',    src: '', placeholder: 'MR' },
-    { id: 4, cat: 'mockups',  title: 'UI Dashboard',      src: '', placeholder: 'UI' },
-    { id: 5, cat: 'drawings', title: 'Character Sketch',  src: '', placeholder: '✏' },
-    { id: 6, cat: 'drawings', title: 'Illustration',      src: '', placeholder: '✏' },
-  ]
+  let works    = $state<Work[]>([])
+  let loading  = $state(true)
+  let activeCategory = $state('all')
+  let lightboxIndex: number | null = $state(null)
+
+  $effect(() => {
+    supabase
+      .from('design_works')
+      .select('id, title, category, placeholder, src')
+      .order('order_index')
+      .then(({ data }: { data: Work[] | null }) => {
+        works   = data ?? []
+        loading = false
+      })
+  })
 
   const filtered = $derived(
     activeCategory === 'all'
       ? works
-      : works.filter(w => w.cat === activeCategory)
+      : works.filter(w => w.category === activeCategory)
   )
 
-  let lightboxSrc: string | null = $state(null)
+  const withSrc = $derived(filtered.filter(w => w.src))
+
+  const lightboxWork = $derived(
+    lightboxIndex !== null ? withSrc[lightboxIndex] ?? null : null
+  )
+
+  function openLightbox(work: Work) {
+    const idx = withSrc.findIndex(w => w.id === work.id)
+    if (idx !== -1) lightboxIndex = idx
+  }
+
+  function closeLightbox() { lightboxIndex = null }
+
+  function prev() {
+    if (lightboxIndex === null) return
+    lightboxIndex = (lightboxIndex - 1 + withSrc.length) % withSrc.length
+  }
+
+  function next() {
+    if (lightboxIndex === null) return
+    lightboxIndex = (lightboxIndex + 1) % withSrc.length
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (lightboxIndex === null) return
+    if (e.key === 'ArrowRight') next()
+    if (e.key === 'ArrowLeft')  prev()
+    if (e.key === 'Escape')     closeLightbox()
+  }
+
+  function catCount(id: string) {
+    return id === 'all' ? works.length : works.filter(w => w.category === id).length
+  }
 </script>
 
 <div class="design-layout">
@@ -42,9 +88,7 @@
           {cat.id === 'all' ? '◈' : cat.id === 'flyers' ? '◻' : cat.id === 'mockups' ? '⊞' : '✏'}
         </span>
         {cat.label}
-        <span class="sidebar-item__count">
-          {cat.id === 'all' ? works.length : works.filter(w => w.cat === cat.id).length}
-        </span>
+        <span class="sidebar-item__count">{catCount(cat.id)}</span>
       </button>
     {/each}
   </aside>
@@ -53,37 +97,54 @@
   <main class="design-main">
     <div class="design-watermark" aria-hidden="true">DESIGN</div>
 
-    <div class="design-grid" style="animation: panelIn .2s ease">
-      {#each filtered as work (work.id)}
-        <button
-          class="design-card"
-          onclick={() => work.src && (lightboxSrc = work.src)}
-          style="animation: panelIn .15s ease"
-        >
-          <div class="design-card__thumb">
-            {#if work.src}
-              <img src={work.src} alt={work.title} />
-            {:else}
-              <span class="design-card__placeholder">{work.placeholder}</span>
-            {/if}
-            <div class="design-card__overlay">
-              <span class="design-card__zoom">↗</span>
+    {#if loading}
+      <div class="design-loading">Loading…</div>
+    {:else}
+      <div class="design-grid" style="animation: panelIn .2s ease">
+        {#each filtered as work (work.id)}
+          <button
+            class="design-card"
+            onclick={() => work.src && openLightbox(work)}
+            style="animation: panelIn .15s ease"
+          >
+            <div class="design-card__thumb">
+              {#if work.src}
+                <img src={work.src} alt={work.title} />
+              {:else}
+                <span class="design-card__placeholder">{work.placeholder}</span>
+              {/if}
+              <div class="design-card__overlay">
+                <span class="design-card__zoom">↗</span>
+              </div>
             </div>
-          </div>
-          <div class="design-card__info">
-            <span class="design-card__title">{work.title}</span>
-            <span class="design-card__cat">{work.cat}</span>
-          </div>
-        </button>
-      {/each}
-    </div>
+            <div class="design-card__info">
+              <span class="design-card__title">{work.title}</span>
+              <span class="design-card__cat">{work.category}</span>
+            </div>
+          </button>
+        {/each}
+      </div>
+    {/if}
   </main>
 
   <!-- Lightbox -->
-  {#if lightboxSrc}
-    <div class="lightbox" onclick={() => lightboxSrc = null} onkeydown={(e) => e.key === 'Escape' && (lightboxSrc = null)} role="dialog" aria-modal="true" tabindex="-1">
-      <img src={lightboxSrc} alt="Preview" />
-      <button class="lightbox__close" onclick={() => lightboxSrc = null}>✕</button>
+  {#if lightboxWork}
+    <div class="lightbox" onkeydown={onKeydown} role="dialog" aria-modal="true" tabindex="-1">
+      <button class="lightbox__backdrop" onclick={closeLightbox} aria-label="Close"></button>
+
+      <button class="lightbox__nav lightbox__nav--prev" onclick={prev} aria-label="Previous">‹</button>
+
+      <div class="lightbox__content">
+        <img src={lightboxWork.src!} alt={lightboxWork.title} />
+        <p class="lightbox__caption">
+          {lightboxWork.title}
+          <span>{lightboxIndex! + 1} / {withSrc.length}</span>
+        </p>
+      </div>
+
+      <button class="lightbox__nav lightbox__nav--next" onclick={next} aria-label="Next">›</button>
+
+      <button class="lightbox__close" onclick={closeLightbox}>✕</button>
     </div>
   {/if}
 
@@ -186,6 +247,16 @@
   line-height: 1;
 }
 
+.design-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: .85rem;
+  color: var(--color-secondary);
+  opacity: .6;
+}
+
 /* Grid */
 .design-grid {
   display: grid;
@@ -281,26 +352,85 @@
 .lightbox {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
-  backdrop-filter: blur(8px);
+}
+
+.lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.88);
+  backdrop-filter: blur(10px);
+  border: none;
   cursor: zoom-out;
 }
 
-.lightbox img {
-  max-width: 90%;
-  max-height: 90%;
+.lightbox__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  width: 80%;
+  height: 82%;
+}
+
+.lightbox__content img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 24px 64px rgba(0,0,0,.8);
+}
+
+.lightbox__caption {
+  font-size: .78rem;
+  color: rgba(255,255,255,.6);
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.lightbox__caption span {
+  font-size: .68rem;
+  background: rgba(255,255,255,.1);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+}
+
+.lightbox__nav {
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,.08);
+  border: var(--border-subtle);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+  margin: 0 .5rem;
+  line-height: 1;
+}
+
+.lightbox__nav:hover {
+  background: rgba(139,92,246,.4);
+  border-color: rgba(139,92,246,.6);
 }
 
 .lightbox__close {
   position: absolute;
   top: 12px;
   right: 14px;
+  z-index: 2;
   background: rgba(255,255,255,.1);
   border: var(--border-subtle);
   border-radius: 50%;
