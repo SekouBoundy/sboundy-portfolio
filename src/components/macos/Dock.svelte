@@ -5,12 +5,13 @@
 
   const ITEMS: { id?: WinID; img?: string; emoji?: string; text?: string; label: string; separator?: boolean }[] = [
     { id: 'about',    img: '/icons/about.png',    label: 'About Me' },
+    { id: 'design',   img: '/icons/design.png',   label: 'Design'   },
     { id: 'skills',   img: '/icons/skills.png',   label: 'Skills'   },
     { id: 'projects', img: '/icons/projects.png', label: 'Projects' },
     { id: 'blog',     img: '/icons/blog.png',     label: 'Blog'     },
-    { id: 'contact',  img: '/icons/contact.png',  label: 'Contact'  },
+    
     { separator: true, label: '' },
-    { img: '/icons/github.png', label: 'GitHub' },
+    { id: 'contact', img: '/icons/contact.png', label: 'Contact' },
     { img: '/icons/trash.png',  label: 'Trash'  },
   ]
 

@@ -102,7 +102,7 @@
     display: flex;
     align-items: center;
     padding: 0 12px;
-    background: var(--win-chrome-bg, rgba(30, 15, 60, .92));
+    background: var(--win-chrome-bg, rgba(16, 11, 27, 0.92));
     backdrop-filter: blur(20px);
     border-bottom: .5px solid var(--win-chrome-border, rgba(255,255,255,.08));
     cursor: grab !important;
@@ -172,11 +172,11 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: var(--win-content-bg, rgba(18, 8, 40, .95));
+    background: var(--win-content-bg, rgba(0, 0, 0, 0.5));
     backdrop-filter: blur(30px);
   }
 
   :global(body.light) .win-content {
-    --win-content-bg: rgba(250, 248, 255, .98);
+    --win-content-bg: rgba(255, 255, 255, 0.5);
   }
 </style>

@@ -8,9 +8,10 @@
   // We lazy-import content so unused windows cost zero on load
   const WIN_CONFIG: Record<WinID, { title: string; component: () => Promise<any> }> = {
     about:    { title: 'About — SBOUNDY',    component: () => import('../windows/About.svelte')    },
-    skills:   { title: 'Skills — Terminal',  component: () => import('../windows/Skills.svelte')   },
+    skills:   { title: 'sboundy@portfolio — skills -zsh<',  component: () => import('../windows/Skills.svelte')   },
     projects: { title: 'Projects — SBOUNDY', component: () => import('../windows/Projects.svelte') },
     blog:     { title: 'Blog — Notes',       component: () => import('../windows/Blog.svelte')     },
+    design:   { title: 'Design — SBOUNDY',   component: () => import('../windows/Design.svelte')   },
     contact:  { title: "Let's talk.",        component: () => import('../windows/Contact.svelte')  },
   }
 

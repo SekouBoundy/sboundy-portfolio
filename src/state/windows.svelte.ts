@@ -3,7 +3,7 @@
 //  Windows — Svelte 5 reactive state
 // ═══════════════════════════════════════
 
-export type WinID = 'about' | 'skills' | 'projects' | 'blog' | 'contact'
+export type WinID = 'about' | 'skills' | 'projects' | 'blog' | 'design' | 'contact'
 
 type WinState = {
   open:      boolean
@@ -22,7 +22,8 @@ const DEFAULTS: Record<WinID, { w: number; h: number; top: number; left: number 
   skills:   { w: 620, h: 440, top: 100, left: 180 },
   projects: { w: 760, h: 520, top: 90,  left: 120 },
   blog:     { w: 640, h: 460, top: 110, left: 160 },
-  contact:  { w: 600, h: 440, top: 120, left: 200 },
+  design:   { w: 760, h: 520, top: 120, left: 200 },
+  contact:  { w: 580, h: 420, top: 130, left: 220 },
 }
 
 function makeWin(id: WinID): WinState {
@@ -45,6 +46,7 @@ export const wins = $state<Record<WinID, WinState>>({
   skills:   makeWin('skills'),
   projects: makeWin('projects'),
   blog:     makeWin('blog'),
+  design:   makeWin('design'),
   contact:  makeWin('contact'),
 })
 
