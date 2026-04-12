@@ -88,7 +88,7 @@
         <!-- hero -->
         <div class="about-hero">
           <div class="about-photo">
-            <img src="/icons/about.png" alt="SBOUNDY" onerror={(e) => (e.currentTarget.style.display = 'none')} />
+            <img src="/icons/about.png" alt="SBOUNDY" onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
             <!-- <div class="about-photo__fallback">SB</div> -->
           </div>
 

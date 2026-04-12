@@ -12,6 +12,7 @@ import Menubar from './components/macos/Menubar.svelte'
 import Desktop from './components/macos/Desktop.svelte'
 import Dock    from './components/macos/Dock.svelte'
 import { Cursor } from './components/shared/Cursor.ts'
+import IOS from './components/ios/IOS.svelte'
 
 const isMobile = window.innerWidth <= 768
 
@@ -35,7 +36,7 @@ onMount(() => {
     <Dock />
   </div>
 {:else}
-  <div id="ios"></div>
+  <IOS />
 {/if}
 
 <style>
