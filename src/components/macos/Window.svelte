@@ -36,11 +36,11 @@
     class="win"
     class:win--maximized={win.maximized}
     class:win--dragging={dragging}
-    style:top="{win.maximized ? 0 : win.top}px"
-    style:left="{win.maximized ? 100 : win.left}px"
+    style:top="{win.maximized ? 10 : win.top}px"
+    style:left="{win.maximized ? 50 : win.left}px"
     // style:right="{win.maximized ? 0 : undefined}px"
-    style:width="{win.maximized ? '100%' : win.w + 'px'}"
-    style:height="{win.maximized ? '100%' : win.h + 'px'}"
+    style:width="{win.maximized ? '95%' : win.w + 'px'}"
+    style:height="{win.maximized ? '90%' : win.h + 'px'}"
     style:z-index={win.z}
     onmousedown={() => focusWin(id)}
   >
