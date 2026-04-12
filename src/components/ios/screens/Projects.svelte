@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { supabase } from '$lib/supabase.js'
+  import { supabase } from '$lib/supabase'
   import { currentLang } from '../../../stores/index'
 
   let { active, timeStr, back }: {

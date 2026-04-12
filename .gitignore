@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# in .gitignore
+.mcp.json
+
 # Build output
 dist/
 

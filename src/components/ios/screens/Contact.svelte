@@ -6,11 +6,37 @@
     back: () => void
   } = $props()
 
-  let name = $state(''), email = $state(''), msg = $state(''), sent = $state(false)
+  import { supabase } from '../../../lib/supabase'
 
-  function sendMsg(e: SubmitEvent) {
+  let name = $state(''), email = $state(''), subject = $state(''), msg = $state('')
+  let sent = $state(false), sending = $state(false), error = $state('')
+
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const touched  = $state({ name: false, email: false, msg: false })
+  const nameErr  = $derived(touched.name  && !name.trim()         ? 'Required' : '')
+  const emailErr = $derived(touched.email && !emailRe.test(email) ? 'Invalid email' : '')
+  const msgErr   = $derived(touched.msg   && !msg.trim()          ? 'Required' : '')
+
+  async function sendMsg(e: SubmitEvent) {
     e.preventDefault()
-    if (name && email && msg) sent = true
+    touched.name = touched.email = touched.msg = true
+    if (!name.trim() || !emailRe.test(email) || !msg.trim()) return
+    sending = true
+    error = ''
+    const { error: err } = await supabase
+      .from('messages')
+      .insert({
+        name:    name.trim(),
+        email:   email.trim(),
+        subject: subject || t.contact.form.subjects[0],
+        message: msg.trim(),
+      })
+    sending = false
+    if (err) {
+      error = err.message
+    } else {
+      sent = true
+    }
   }
 </script>
 
@@ -35,38 +61,59 @@
         <div class="ios-sent__icon">✓</div>
         <div class="ios-sent__title">{t.contact.sent.title}</div>
         <div class="ios-sent__sub">{t.contact.sent.sub}</div>
-        <button class="ios-sent__btn" onclick={() => { sent = false; name = ''; email = ''; msg = '' }}>
+        <button class="ios-sent__btn" onclick={() => { sent = false; name = ''; email = ''; subject = ''; msg = ''; touched.name = false; touched.email = false; touched.msg = false }}>
           {t.contact.sent.again}
         </button>
       </div>
     {:else}
       <form class="ios-form" onsubmit={sendMsg}>
         <div class="ios-section-header">{t.contact.form.name.toUpperCase()}</div>
-        <div class="ios-list">
+        <div class="ios-list" class:ios-list-invalid={!!nameErr}>
           <div class="ios-list-item" style="padding:0">
             <input class="ios-input" type="text" bind:value={name}
-              placeholder={t.contact.form.namePlaceholder} required />
+              placeholder={t.contact.form.namePlaceholder}
+              onblur={() => touched.name = true} />
           </div>
         </div>
+        {#if nameErr}<p class="ios-field-err">{nameErr}</p>{/if}
 
         <div class="ios-section-header">{t.contact.form.email.toUpperCase()}</div>
-        <div class="ios-list">
+        <div class="ios-list" class:ios-list-invalid={!!emailErr}>
           <div class="ios-list-item" style="padding:0">
             <input class="ios-input" type="email" bind:value={email}
-              placeholder="you@example.com" required />
+              placeholder="you@example.com"
+              onblur={() => touched.email = true} />
           </div>
+        </div>
+        {#if emailErr}<p class="ios-field-err">{emailErr}</p>{/if}
+
+        <div class="ios-section-header">{t.contact.form.subject.toUpperCase()}</div>
+        <div class="ios-subject-pills">
+          {#each t.contact.form.subjects as s}
+            <button type="button" class="ios-subject-pill"
+              class:active={subject === s}
+              onclick={() => subject = s}>{s}</button>
+          {/each}
         </div>
 
         <div class="ios-section-header">{t.contact.form.message.toUpperCase()}</div>
-        <div class="ios-list">
+        <div class="ios-list" class:ios-list-invalid={!!msgErr}>
           <div class="ios-list-item" style="padding:0">
             <textarea class="ios-input ios-textarea" bind:value={msg}
-              placeholder={t.contact.form.messagePlaceholder} rows="4" required></textarea>
+              placeholder={t.contact.form.messagePlaceholder} rows="4"
+              onblur={() => touched.msg = true}></textarea>
           </div>
         </div>
+        {#if msgErr}<p class="ios-field-err">{msgErr}</p>{/if}
+
+        {#if error}
+          <p class="ios-form-error">{error}</p>
+        {/if}
 
         <div class="ios-contact-btns">
-          <button type="submit" class="ios-submit-btn">{t.contact.form.submit}</button>
+          <button type="submit" class="ios-submit-btn" disabled={sending}>
+            {sending ? '...' : t.contact.form.submit}
+          </button>
         </div>
       </form>
     {/if}
@@ -74,11 +121,11 @@
     <div class="ios-section-header">LINKS</div>
     <div class="ios-list">
       {#each t.contact.links as link}
-        <div class="ios-list-item">
+        <a class="ios-list-item" href={link.href} target="_blank" rel="noopener" style="text-decoration:none">
           <div class="ios-list-icon" style="background:rgba(139,92,246,.18)">{link.icon}</div>
           <span class="ios-list-label__main">{link.label}</span>
           <span class="ios-chevron">›</span>
-        </div>
+        </a>
       {/each}
     </div>
 
@@ -103,6 +150,50 @@
   cursor: pointer; transition: opacity .15s; font-family: var(--font-body);
 }
 .ios-submit-btn:active { opacity: .8; }
+.ios-submit-btn:disabled { opacity: .5; cursor: default; }
+
+.ios-list-invalid { border-color: rgba(255,107,107,.4) !important; }
+
+.ios-field-err {
+  margin: -6px 16px 4px;
+  font-size: 11px;
+  color: #ff6b6b;
+}
+
+.ios-subject-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 16px 12px;
+}
+
+.ios-subject-pill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: .5px solid rgba(255,255,255,.15);
+  background: transparent;
+  color: rgba(255,255,255,.5);
+  font-size: 13px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.ios-subject-pill.active {
+  background: rgba(139,92,246,.25);
+  border-color: rgba(139,92,246,.5);
+  color: #fff;
+}
+
+.ios-form-error {
+  margin: 0 16px 8px;
+  font-size: 12px;
+  color: #ff6b6b;
+  padding: 8px 12px;
+  background: rgba(255,107,107,.08);
+  border-radius: 10px;
+  border: .5px solid rgba(255,107,107,.2);
+}
 
 .ios-sent {
   margin: 32px 16px; padding: 32px 20px;

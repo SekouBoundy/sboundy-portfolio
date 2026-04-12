@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { supabase } from '$lib/supabase.js'
+  import { supabase } from '$lib/supabase'
 
   type Work = {
     id: number

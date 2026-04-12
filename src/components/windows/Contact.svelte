@@ -2,32 +2,46 @@
   import { currentLang } from '../../stores/index'
   import { content as en } from '../../data/content.en.js'
   import { content as fr } from '../../data/content.fr.js'
+  import { supabase } from '../../lib/supabase'
 
   const translations: Record<string, typeof en> = { en, fr }
   const c = $derived(translations[$currentLang].contact)
 
   let name    = $state('')
   let email   = $state('')
+  let subject = $state('')
   let message = $state('')
   let sent    = $state(false)
   let sending = $state(false)
+  let error   = $state('')
 
-  const links = [
-    { icon: '✉', label: 'sekouboundy55@gmail.com', href: 'mailto:sekouboundy55@gmail.com' },
-    { icon: '⌥', label: 'GitHub',                  href: 'https://github.com/' },
-    { icon: '▲', label: 'Figma Community',          href: 'https://figma.com/@sboundy' },
-    { icon: 'in', label: 'LinkedIn',                href: '#' },
-    { icon: 'W', label: 'WhatsApp',                href: '#' },
-  ]
+  // Real-time validation
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const touched  = $state({ name: false, email: false, message: false })
+  const nameErr    = $derived(touched.name    && !name.trim()           ? 'Required' : '')
+  const emailErr   = $derived(touched.email   && !emailRe.test(email)   ? 'Invalid email' : '')
+  const messageErr = $derived(touched.message && !message.trim()        ? 'Required' : '')
+  const canSubmit  = $derived(!!name.trim() && emailRe.test(email) && !!message.trim())
 
-  function handleSubmit() {
-    if (!name.trim() || !email.trim() || !message.trim()) return
+  async function handleSubmit() {
+    touched.name = touched.email = touched.message = true
+    if (!canSubmit) return
     sending = true
-    // Simulate send — replace with real endpoint if needed
-    setTimeout(() => {
-      sending = false
-      sent    = true
-    }, 1200)
+    error = ''
+    const { error: err } = await supabase
+      .from('messages')
+      .insert({
+        name:    name.trim(),
+        email:   email.trim(),
+        subject: subject || c.form.subjects[0],
+        message: message.trim(),
+      })
+    sending = false
+    if (err) {
+      error = err.message
+    } else {
+      sent = true
+    }
   }
 </script>
 
@@ -42,7 +56,7 @@
       <p class="aside-sub">{c.subtitle}</p>
 
       <div class="aside-links">
-        {#each links as link}
+        {#each c.links as link}
           <a class="aside-link" href={link.href} target="_blank" rel="noopener">
             <span class="aside-link__icon">{link.icon}</span>
             <span class="aside-link__label">{link.label}</span>
@@ -61,7 +75,7 @@
         <div class="sent-icon">✓</div>
         <h3 class="sent-title">{c.sent.title}</h3>
         <p class="sent-sub">{c.sent.sub}</p>
-        <button class="sent-reset" onclick={() => { sent = false; name = ''; email = ''; message = '' }}>
+        <button class="sent-reset" onclick={() => { sent = false; name = ''; email = ''; subject = ''; message = ''; touched.name = false; touched.email = false; touched.message = false }}>
           {c.sent.again}
         </button>
       </div>
@@ -72,28 +86,48 @@
         onsubmit={(e) => { e.preventDefault(); handleSubmit() }}
         style="animation: panelIn .2s ease"
       >
-        <div class="form-group">
-          <label class="form-label" for="cf-name">{c.form.name}</label>
-          <input
-            id="cf-name"
-            class="form-input"
-            type="text"
-            placeholder={c.form.namePlaceholder}
-            bind:value={name}
-            required
-          />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="cf-name">{c.form.name}</label>
+            <input
+              id="cf-name"
+              class="form-input"
+              class:invalid={!!nameErr}
+              type="text"
+              placeholder={c.form.namePlaceholder}
+              bind:value={name}
+              onblur={() => touched.name = true}
+            />
+            {#if nameErr}<span class="field-err">{nameErr}</span>{/if}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cf-email">{c.form.email}</label>
+            <input
+              id="cf-email"
+              class="form-input"
+              class:invalid={!!emailErr}
+              type="email"
+              placeholder="your@email.com"
+              bind:value={email}
+              onblur={() => touched.email = true}
+            />
+            {#if emailErr}<span class="field-err">{emailErr}</span>{/if}
+          </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="cf-email">{c.form.email}</label>
-          <input
-            id="cf-email"
-            class="form-input"
-            type="email"
-            placeholder="your@email.com"
-            bind:value={email}
-            required
-          />
+          <label class="form-label" for="cf-subject">{c.form.subject}</label>
+          <div class="subject-pills">
+            {#each c.form.subjects as s}
+              <button
+                type="button"
+                class="subject-pill"
+                class:active={subject === s}
+                onclick={() => subject = s}
+              >{s}</button>
+            {/each}
+          </div>
         </div>
 
         <div class="form-group">
@@ -101,17 +135,23 @@
           <textarea
             id="cf-msg"
             class="form-input form-textarea"
+            class:invalid={!!messageErr}
             placeholder={c.form.messagePlaceholder}
             rows="5"
             bind:value={message}
-            required
+            onblur={() => touched.message = true}
           ></textarea>
+          {#if messageErr}<span class="field-err">{messageErr}</span>{/if}
         </div>
+
+        {#if error}
+          <p class="form-error">{error}</p>
+        {/if}
 
         <button
           class="form-submit"
           type="submit"
-          disabled={sending || !name.trim() || !email.trim() || !message.trim()}
+          disabled={sending}
         >
           {#if sending}
             <span class="submit-dot"></span>
@@ -283,6 +323,53 @@
 
 .form-textarea { min-height: 110px; }
 
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+
+.form-input.invalid {
+  border-color: rgba(255,107,107,.5);
+  background: rgba(255,107,107,.04);
+}
+
+.field-err {
+  font-size: .62rem;
+  color: #ff6b6b;
+  letter-spacing: .03em;
+}
+
+/* Subject pills */
+.subject-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+}
+
+.subject-pill {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: var(--border-subtle);
+  background: transparent;
+  color: var(--color-secondary);
+  font-size: .72rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.subject-pill:hover {
+  color: var(--color-white);
+  border-color: rgba(139,92,246,.4);
+}
+
+.subject-pill.active {
+  background: rgba(139,92,246,.2);
+  border-color: rgba(139,92,246,.5);
+  color: var(--color-white);
+}
+
 .form-submit {
   align-self: flex-end;
   display: flex;
@@ -309,6 +396,15 @@
 }
 
 .form-submit:disabled { opacity: .4; cursor: default; }
+
+.form-error {
+  font-size: .75rem;
+  color: #ff6b6b;
+  padding: .4rem .6rem;
+  background: rgba(255,107,107,.08);
+  border-radius: var(--radius-sm);
+  border: .5px solid rgba(255,107,107,.25);
+}
 
 /* Sending dots */
 .submit-dot {

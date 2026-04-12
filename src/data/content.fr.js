@@ -150,14 +150,16 @@ export const content = {
     form: {
       name: 'Nom', namePlaceholder: 'Ton prénom',
       email: 'Email',
+      subject: 'Sujet',
+      subjects: ['Projet', 'Collaboration', 'Offre d\'emploi', 'Juste bonjour'],
       message: 'Message', messagePlaceholder: 'De quoi veux-tu parler ?',
       submit: 'Envoyer →',
     },
     links: [
-      { icon: '✉️', label: 'hello@sboundy.com' },
-      { icon: '⌥',  label: 'GitHub'            },
-      { icon: '▲',  label: 'Figma Community'   },
-      { icon: 'in', label: 'LinkedIn'           },
+      { icon: '✉️', label: 'sekouboundy55@gmail.com', href: 'mailto:sekouboundy55@gmail.com' },
+      { icon: '⌥',  label: 'GitHub',                  href: 'https://github.com/SekouBoundy'  },
+      { icon: '▲',  label: 'Figma Community',          href: 'https://figma.com/@sboundy'      },
+      { icon: 'in', label: 'LinkedIn',                 href: 'https://linkedin.com/in/sboundy' },
     ],
   },
 }
