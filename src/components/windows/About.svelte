@@ -17,10 +17,10 @@
   }
 
   const links = [
-    { icon: '✉', label: 'sekouboundy55@gmail.com',  href: 'mailto:sekouboundy55@gmail.com' },
-    { icon: '⌥', label: 'GitHub',              href: '#' },
-    { icon: '▲', label: 'Figma Community',     href: '#' },
-    { icon: 'in', label: 'LinkedIn',            href: '#' },
+    { svg: '/icons/mail.svg',   label: 'sekouboundy55@gmail.com', href: 'mailto:sekouboundy55@gmail.com' },
+    { svg: '/icons/github.svg', label: 'GitHub',                  href: 'https://github.com/SekouBoundy' },
+    { svg: '/icons/figma.svg',  label: 'Figma Community',         href: 'https://www.figma.com/@sboundy' },
+    { svg: null,                label: 'LinkedIn',                 href: 'https://linkedin.com/in/sekou-boundy' },
   ]
 
   const tabs = $derived([
@@ -67,8 +67,14 @@
 
     <div class="sidebar-links">
       {#each links as link}
-        <a class="sidebar-link" href={link.href}>
-          <span class="sidebar-link__icon">{link.icon}</span>
+        <a class="sidebar-link" href={link.href} target={link.href.startsWith('mailto') ? undefined : '_blank'} rel="noopener noreferrer">
+          <span class="sidebar-link__icon">
+            {#if link.svg}
+              <img src={link.svg} alt="" class="sidebar-link__svg" />
+            {:else}
+              in
+            {/if}
+          </span>
           <span class="sidebar-link__label">{link.label}</span>
         </a>
       {/each}
@@ -88,8 +94,8 @@
         <!-- hero -->
         <div class="about-hero">
           <div class="about-photo">
+            <div class="about-photo__ring"></div>
             <img src="/icons/about.png" alt="SBOUNDY" onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
-            <!-- <div class="about-photo__fallback">SB</div> -->
           </div>
 
           <div class="about-info">
@@ -105,18 +111,22 @@
         <!-- stats -->
         <div class="about-stats">
           <div class="astat">
+            <div class="astat__icon">⏱</div>
             <div class="astat__num">3+</div>
             <div class="astat__label">{about.stats.exp}</div>
           </div>
           <div class="astat">
+            <div class="astat__icon">🌐</div>
             <div class="astat__num astat__num--sm">{about.stats.lang}</div>
             <div class="astat__label">Languages</div>
           </div>
           <div class="astat">
+            <div class="astat__icon">💡</div>
             <div class="astat__num">∞</div>
             <div class="astat__label">{about.stats.ideas}</div>
           </div>
           <div class="astat astat--accent">
+            <div class="astat__icon">📍</div>
             <div class="astat__num astat__num--sm">MALI</div>
             <div class="astat__label">{about.stats.base}</div>
           </div>
@@ -143,7 +153,7 @@
       <div class="about-panel" style="animation: panelIn .2s ease">
         <h2 class="panel-title">Journey</h2>
         <div class="journey-list">
-          {#each about.journey as item, i}
+          {#each about.journey as item}
             <div class="journey-item">
               <div class="journey-dot"></div>
               <div class="journey-date">{item.date}</div>
@@ -262,6 +272,21 @@
   width: 16px;
   text-align: center;
   opacity: .6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-link__svg {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  filter: invert(1) opacity(0.6);
+  transition: filter var(--transition-fast);
+}
+
+.sidebar-link:hover .sidebar-link__svg {
+  filter: invert(1) opacity(1);
 }
 
 .sidebar-link__label {
@@ -313,14 +338,22 @@
   background: var(--color-surface);
 }
 
+.about-photo__ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: calc(var(--radius-md) + 3px);
+  background: linear-gradient(135deg, rgba(139,92,246,.7) 0%, rgba(59,130,246,.4) 60%, transparent 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
 .about-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top;
   border-radius: var(--radius-md);
-  border: var(--border-subtle);
-  box-shadow: 0 8px 32px rgba(139,92,246,.2);
+  box-shadow: 0 8px 32px rgba(139,92,246,.25);
   transition: transform .35s cubic-bezier(0.34,1.56,0.64,1), box-shadow .35s ease;
   display: block;
   cursor: zoom-in;
@@ -331,7 +364,7 @@
 
 .about-photo img:hover {
   transform: scale(2) translate(10px, 8px);
-  box-shadow: 0 24px 64px rgba(139,92,246,.45);
+  box-shadow: 0 24px 64px rgba(139,92,246,.5);
   z-index: 20;
 }
 
@@ -376,7 +409,9 @@
   font-size: var(--fs-small);
   color: var(--color-secondary);
   line-height: 1.85;
-  max-width: 340px;
+  max-width: 420px;
+  border-left: 2px solid rgba(139,92,246,.35);
+  padding-left: .75rem;
 }
 
 .about-info :global(strong) {
@@ -395,20 +430,31 @@
   background: rgba(255,255,255,.04);
   border: var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: .75rem .5rem;
+  padding: .75rem .5rem .6rem;
   text-align: center;
   transition: var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
 }
 
 .astat:hover {
-  border-color: rgba(139,92,246,.3);
-  background: rgba(139,92,246,.06);
-  transform: translateY(-1px);
+  border-color: rgba(139,92,246,.35);
+  background: rgba(139,92,246,.08);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139,92,246,.12);
 }
 
 .astat--accent {
   background: rgba(139,92,246,.1);
   border-color: rgba(139,92,246,.25);
+}
+
+.astat__icon {
+  font-size: .9rem;
+  opacity: .55;
+  margin-bottom: .15rem;
 }
 
 .astat__num {
@@ -420,13 +466,13 @@
 
 .astat__num--sm {
   font-size: 1.1rem;
-  padding-top: .35rem;
+  padding-top: .25rem;
 }
 
 .astat__label {
   font-size: .65rem;
   color: var(--color-secondary);
-  margin-top: .2rem;
+  margin-top: .15rem;
   text-transform: uppercase;
   letter-spacing: .06em;
 }
@@ -490,6 +536,14 @@
   gap: .75rem;
   position: relative;
   padding-bottom: 1.4rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  padding-left: .1rem;
+  padding-right: .1rem;
+}
+
+.journey-item:hover {
+  background: rgba(139,92,246,.05);
 }
 
 .journey-item:last-child {
@@ -503,7 +557,7 @@
   top: 16px;
   bottom: 0;
   width: 1px;
-  background: rgba(139,92,246,.25);
+  background: linear-gradient(to bottom, rgba(139,92,246,.5), rgba(139,92,246,.1));
 }
 
 .journey-dot {
