@@ -1,93 +1,43 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
+  import { supabase } from '../../../lib/supabase'
+
   let { active, timeStr, back }: {
     active: string
     timeStr: string
     back: () => void
   } = $props()
 
-  // Tabs: Library | Albums
+  type Photo = { id: string; src: string; label: string; order: number }
+  type Album = { id: string; name: string; sub: string; color: string; emoji: string; order: number; photos: Photo[] }
+
   let tab = $state<'library' | 'albums'>('albums')
-
-  // Active album (null = albums grid view)
   let openAlbum = $state<string | null>(null)
+  let albums = $state<Album[]>([])
+  let loading = $state(true)
 
-  // ── Albums / Projects ──────────────────────────────────────────────
-  // Each album maps to one of your projects.
-  // Replace `cover` paths with real screenshots once you have them.
-  const albums = [
-    {
-      id: 'marevision',
-      name: 'MaRevision',
-      sub: 'Flutter · Mobile App',
-      color: 'linear-gradient(135deg,#1a1020,#2d1b69)',
-      emoji: '📚',
-      count: 6,
-      photos: [
-        { src: '', label: 'Home screen' },
-        { src: '', label: 'Subjects list' },
-        { src: '', label: 'Quiz flow' },
-        { src: '', label: 'Results' },
-        { src: '', label: 'Dark mode' },
-        { src: '', label: 'Onboarding' },
-      ],
-    },
-    {
-      id: 'design',
-      name: 'Design Work',
-      sub: 'Figma · UI/UX',
-      color: 'linear-gradient(135deg,#0d0d1a,#1a0f33)',
-      emoji: '🎨',
-      count: 8,
-      photos: [
-        { src: '', label: 'App concept' },
-        { src: '', label: 'Component set' },
-        { src: '', label: 'Wireframes' },
-        { src: '', label: 'Mobile UI' },
-        { src: '', label: 'Web mockup' },
-        { src: '', label: 'Dark theme' },
-        { src: '', label: 'Brand kit' },
-        { src: '', label: 'Prototype' },
-      ],
-    },
-    {
-      id: 'illustrations',
-      name: 'Illustrations',
-      sub: 'Hand drawn · Digital',
-      color: 'linear-gradient(135deg,#111,#2a2a2a)',
-      emoji: '✏️',
-      count: 5,
-      photos: [
-        { src: '', label: 'Sketch 01' },
-        { src: '', label: 'Sketch 02' },
-        { src: '', label: 'Flyer' },
-        { src: '', label: 'Portrait' },
-        { src: '', label: 'Logo study' },
-      ],
-    },
-    {
-      id: 'sboundy',
-      name: 'Portfolio',
-      sub: 'Svelte · Web',
-      color: 'linear-gradient(135deg,#0a1628,#1a3a6c)',
-      emoji: '🌐',
-      count: 4,
-      photos: [
-        { src: '', label: 'macOS view' },
-        { src: '', label: 'iOS view' },
-        { src: '', label: 'Mobile' },
-        { src: '', label: 'Dark mode' },
-      ],
-    },
-  ]
+  onMount(async () => {
+    const { data: albumRows } = await supabase
+      .from('photo_albums')
+      .select('*, photos(*)')
+      .order('order')
+      .order('order', { referencedTable: 'photos' })
+
+    if (albumRows) {
+      albums = albumRows.map((a: any) => ({
+        ...a,
+        photos: a.photos ?? [],
+      }))
+    }
+    loading = false
+  })
 
   const currentAlbum = $derived(albums.find(a => a.id === openAlbum) ?? null)
 
-  // Library: flat list of all photos across albums (newest first)
   const allPhotos = $derived(
-    albums.flatMap(a => a.photos.map(p => ({ ...p, album: a.name, emoji: a.emoji, color: a.color })))
+    albums.flatMap(a => (a.photos ?? []).map(p => ({ ...p, album: a.name, emoji: a.emoji, color: a.color })))
   )
 
-  // Selected photo for full-screen preview
   let preview = $state<{ src: string; label: string; album: string; emoji: string; color: string } | null>(null)
 </script>
 
@@ -122,7 +72,7 @@
       <div class="ph-album-nav">
         <button class="ph-nav-back" onclick={() => openAlbum = null}>‹ Albums</button>
         <span class="ph-album-nav__title">{currentAlbum.name}</span>
-        <span class="ph-count">{currentAlbum.count}</span>
+        <span class="ph-count">{currentAlbum.photos.length}</span>
       </div>
 
       <!-- Album hero -->
@@ -182,7 +132,14 @@
 
     <div class="ph-scroll">
 
-      {#if tab === 'albums'}
+      {#if loading}
+        <div class="ph-loading">
+          <span class="ph-loading__dot"></span>
+          <span class="ph-loading__dot"></span>
+          <span class="ph-loading__dot"></span>
+        </div>
+
+      {:else if tab === 'albums'}
         <!-- ── ALBUMS TAB ── -->
         <div class="ph-section-label">MY PROJECTS</div>
 
@@ -205,7 +162,7 @@
               </div>
               <div class="ph-album-info">
                 <div class="ph-album-name">{album.name}</div>
-                <div class="ph-album-count">{album.count}</div>
+                <div class="ph-album-count">{album.photos.length}</div>
               </div>
             </div>
           {/each}
@@ -317,6 +274,26 @@
   padding-bottom: 16px;
 }
 .ph-scroll::-webkit-scrollbar { display: none; }
+
+.ph-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 48px 0;
+}
+.ph-loading__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.3);
+  animation: phDot 1s infinite ease-in-out;
+}
+.ph-loading__dot:nth-child(2) { animation-delay: .15s; }
+.ph-loading__dot:nth-child(3) { animation-delay: .3s; }
+@keyframes phDot {
+  0%, 80%, 100% { transform: scale(.6); opacity: .3; }
+  40%           { transform: scale(1);  opacity: 1; }
+}
 
 .ph-section-label {
   font-size: 11px;

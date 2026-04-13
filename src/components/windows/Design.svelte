@@ -20,6 +20,18 @@
   let loading  = $state(true)
   let activeCategory = $state('all')
   let lightboxIndex: number | null = $state(null)
+  let hoveredWork = $state<Work | null>(null)
+  let hoverTimer: ReturnType<typeof setTimeout> | null = null
+
+  function startHover(work: Work) {
+    if (!work.src) return
+    hoverTimer = setTimeout(() => { hoveredWork = work }, 1000)
+  }
+
+  function endHover() {
+    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null }
+    hoveredWork = null
+  }
 
   $effect(() => {
     supabase
@@ -105,6 +117,8 @@
           <button
             class="design-card"
             onclick={() => work.src && openLightbox(work)}
+            onmouseenter={() => startHover(work)}
+            onmouseleave={() => endHover()}
             style="animation: panelIn .15s ease"
           >
             <div class="design-card__thumb">
@@ -125,7 +139,18 @@
         {/each}
       </div>
     {/if}
+
   </main>
+
+  <!-- Hover preview — over main area only, outside scroll container -->
+  {#if hoveredWork && !lightboxWork}
+    <div class="hover-backdrop"></div>
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="hover-preview" onmouseenter={() => hoveredWork = hoveredWork} onmouseleave={() => endHover()}>
+      <img src={hoveredWork.src!} alt={hoveredWork.title} />
+      <p class="hover-preview__caption">{hoveredWork.title}</p>
+    </div>
+  {/if}
 
   <!-- Lightbox -->
   {#if lightboxWork}
@@ -231,6 +256,7 @@
 .design-main {
   position: relative;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 1.25rem;
 }
 
@@ -264,6 +290,7 @@
   gap: .75rem;
   position: relative;
   z-index: 1;
+  overflow: visible;
 }
 
 .design-card {
@@ -272,15 +299,15 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: transform .3s ease, box-shadow .3s ease, z-index 0s;
   text-align: left;
   padding: 0;
+  position: relative;
 }
 
 .design-card:hover {
   border-color: rgba(139,92,246,.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
 }
 
 .design-card__thumb {
@@ -447,6 +474,57 @@
 
 .lightbox__close:hover {
   background: rgba(255,255,255,.2);
+}
+
+/* Hover preview */
+.hover-backdrop {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 175px; right: 0;
+  z-index: 39;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.hover-preview {
+  position: absolute;
+  top: 1rem; bottom: 1rem;
+  left: calc(175px + 1rem); right: 1rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  pointer-events: none;
+  animation: previewIn .18s ease;
+}
+
+.hover-preview img {
+  max-width: 100%;
+  max-height: calc(100% - 32px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: 0 24px 64px rgba(0,0,0,.85);
+  border: 1px solid rgba(139,92,246,.35);
+}
+
+.hover-preview__caption {
+  font-size: .75rem;
+  color: rgba(255,255,255,.7);
+  background: rgba(0,0,0,.55);
+  padding: 3px 14px;
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+}
+
+@keyframes previewIn {
+  from { opacity: 0; transform: scale(.97); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 @keyframes panelIn {

@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(timeout 15 npx vite build)"
+      "Bash(timeout 15 npx vite build)",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__list_tables"
     ]
   }
 }
