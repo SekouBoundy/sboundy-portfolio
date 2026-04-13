@@ -54,7 +54,40 @@
     rt = wins[id].top
     focusWin(id)
     // Set cursor globally so it stays consistent even when mouse leaves the window
-    document.body.style.cursor = RESIZE_CURSOR[edge]
+    document.documentElement.style.cursor = RESIZE_CURSOR[edge]
+  }
+
+  const EDGE_SIZE = 8
+
+  function getEdgeFromPoint(e: MouseEvent): Edge | null {
+    if (win.maximized) return null
+    const rect = (e.currentTarget as HTMLElement)?.getBoundingClientRect?.()
+    if (!rect) return null
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const onN = y < EDGE_SIZE
+    const onS = y > rect.height - EDGE_SIZE
+    const onW = x < EDGE_SIZE
+    const onE = x > rect.width  - EDGE_SIZE
+    if (onN && onW) return 'nw'
+    if (onN && onE) return 'ne'
+    if (onS && onW) return 'sw'
+    if (onS && onE) return 'se'
+    if (onN) return 'n'
+    if (onS) return 's'
+    if (onW) return 'w'
+    if (onE) return 'e'
+    return null
+  }
+
+  function onWinMouseMove(e: MouseEvent) {
+    if (resizing || dragging) return
+    const edge = getEdgeFromPoint(e)
+    document.documentElement.style.cursor = edge ? RESIZE_CURSOR[edge] : ''
+  }
+
+  function onWinMouseLeave() {
+    if (!resizing && !dragging) document.documentElement.style.cursor = ''
   }
 
   function onMouseMove(e: MouseEvent) {
@@ -90,7 +123,7 @@
   function onMouseUp() {
     dragging  = false
     resizing  = null
-    document.body.style.cursor = ''
+    document.documentElement.style.cursor = ''
   }
 
   function handleClose() {
@@ -104,7 +137,7 @@
   }
 
   // macOS-style open: spring up from center
-  function winIn(node: HTMLElement, _params: unknown) {
+  function winIn(_node: HTMLElement, _params: unknown) {
     return {
       duration: 300,
       easing: cubicOut,
@@ -236,19 +269,9 @@
     style:height="{win.maximized ? '90%' : win.h + 'px'}"
     style:z-index={win.z}
     onmousedown={() => focusWin(id)}
+    onmousemove={onWinMouseMove}
+    onmouseleave={onWinMouseLeave}
   >
-    <!-- Resize handles (hidden when maximized) -->
-    {#if !win.maximized}
-      <div class="rz rz--n"  onmousedown={(e) => onResizeDown(e, 'n')}></div>
-      <div class="rz rz--s"  onmousedown={(e) => onResizeDown(e, 's')}></div>
-      <div class="rz rz--e"  onmousedown={(e) => onResizeDown(e, 'e')}></div>
-      <div class="rz rz--w"  onmousedown={(e) => onResizeDown(e, 'w')}></div>
-      <div class="rz rz--nw" onmousedown={(e) => onResizeDown(e, 'nw')}></div>
-      <div class="rz rz--ne" onmousedown={(e) => onResizeDown(e, 'ne')}></div>
-      <div class="rz rz--sw" onmousedown={(e) => onResizeDown(e, 'sw')}></div>
-      <div class="rz rz--se" onmousedown={(e) => onResizeDown(e, 'se')}></div>
-    {/if}
-
     <!-- Inner shell clips content to border-radius -->
     <div class="win-shell">
     <!-- Chrome -->
@@ -267,6 +290,18 @@
       {@render children()}
     </div>
     </div> <!-- /win-shell -->
+
+    <!-- Resize handles rendered last so they sit above win-shell -->
+    {#if !win.maximized}
+      <div class="rz rz--n"  onmousedown={(e) => onResizeDown(e, 'n')}></div>
+      <div class="rz rz--s"  onmousedown={(e) => onResizeDown(e, 's')}></div>
+      <div class="rz rz--e"  onmousedown={(e) => onResizeDown(e, 'e')}></div>
+      <div class="rz rz--w"  onmousedown={(e) => onResizeDown(e, 'w')}></div>
+      <div class="rz rz--nw" onmousedown={(e) => onResizeDown(e, 'nw')}></div>
+      <div class="rz rz--ne" onmousedown={(e) => onResizeDown(e, 'ne')}></div>
+      <div class="rz rz--sw" onmousedown={(e) => onResizeDown(e, 'sw')}></div>
+      <div class="rz rz--se" onmousedown={(e) => onResizeDown(e, 'se')}></div>
+    {/if}
   </div>
 {/if}
 
@@ -335,7 +370,7 @@
       0 0 0 .5px rgba(255,255,255,.18);
   }
   .win--resizing,
-  .win--resizing * { user-select: none; }
+  .win--resizing * { user-select: none; cursor: inherit !important; }
 
 
   /* ── Resize handles ──────────────────────── */

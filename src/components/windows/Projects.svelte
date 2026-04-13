@@ -1,6 +1,9 @@
 <script lang="ts">
   import { supabase } from '$lib/supabase'
   import { currentLang } from '../../stores/index'
+  import BMICalculator    from '../csharp/BMICalculator.svelte'
+  import AgeCalculator   from '../csharp/Age-calculator-master.svelte'
+  import bmiThumb from '../../assets/images/projects/csharp/Classification.png'
 
   type Project = {
     id: string
@@ -15,11 +18,45 @@
     role: string
     tags: string[]
     screenshots: string[]
+    component?: string
   }
 
-  let projects  = $state<Project[]>([])
-  let loading   = $state(true)
-  let activeTag = $state('All')
+  const LOCAL_PROJECTS: Project[] = [
+    {
+      id: 'bmi-calculator',
+      name: 'BMI Calculator',
+      desc_en: 'A cross-platform BMI calculator with metric/imperial support, animated gauge, and color-coded results. Originally built as a Windows desktop app in C#, ported to the web.',
+      desc_fr: 'Un calculateur d\'IMC multiplateforme avec support métrique/impérial, jauge animée et résultats colorés. Conçu à l\'origine comme application Windows en C#, porté sur le web.',
+      thumb: '⚖️',
+      thumb_url: bmiThumb,
+      color: '#0f172a',
+      url: 'https://github.com/SekouBoundy/BMI_Calulator',
+      year: 2024,
+      role: 'Solo Developer',
+      tags: ['C#', '.NET', 'Desktop', 'Health'],
+      screenshots: [],
+      component: 'BMICalculator',
+    },
+    {
+      id: 'age-calculator',
+      name: 'Age Calculator',
+      desc_en: 'A Windows desktop app that calculates your exact age in years, months, days and hours from your birth date. Built in C#, ported to the web.',
+      desc_fr: 'Une application Windows qui calcule votre âge exact en années, mois, jours et heures à partir de votre date de naissance. Conçue en C#, portée sur le web.',
+      thumb: '🎂',
+      thumb_url: null,
+      color: '#0f172a',
+      url: 'https://github.com/SekouBoundy/Age-calculator',
+      year: 2024,
+      role: 'Solo Developer',
+      tags: ['C#', '.NET', 'Desktop'],
+      screenshots: [],
+      component: 'AgeCalculator',
+    },
+  ]
+
+  let remoteProjects = $state<Project[]>([])
+  let loading        = $state(true)
+  let activeTag      = $state('All')
   let selected: Project | null = $state(null)
   let lang = $state('en')
 
@@ -31,10 +68,12 @@
       .select('*')
       .order('order_index')
       .then(({ data }: { data: Project[] | null }) => {
-        projects = data ?? []
-        loading  = false
+        remoteProjects = data ?? []
+        loading        = false
       })
   })
+
+  const projects = $derived([...LOCAL_PROJECTS, ...remoteProjects])
 
   const allTags = $derived(['All', ...Array.from(new Set(projects.flatMap(p => p.tags)))])
 
@@ -84,53 +123,76 @@
       <div class="proj-detail" style="animation: panelIn .2s ease">
         <button class="detail-back" onclick={close}>← Back</button>
 
-        <div class="detail-thumb" style="background: {selected.color}">
-          {#if selected.thumb_url}
-            <button class="detail-thumb__btn" onclick={() => lightbox = selected!.thumb_url}>
-              <img class="detail-thumb__img" src={selected.thumb_url} alt={selected.name} />
-              <span class="detail-thumb__hint">⤢ Expand</span>
-            </button>
-          {:else}
-            <span class="detail-thumb__text">{selected.thumb}</span>
-          {/if}
-        </div>
+        {#if selected.component === 'BMICalculator'}
+          <div class="proj-live"><BMICalculator /></div>
+        {:else if selected.component === 'AgeCalculator'}
+          <div class="proj-live"><AgeCalculator /></div>
+        {/if}
 
-        <div class="detail-meta">
-          <div class="detail-header">
-            <div>
-              <h2 class="detail-name">{selected.name}</h2>
-              <p class="detail-role">{selected.role} · {selected.year}</p>
+        {#if selected.component}
+          <div class="detail-meta" style="margin-top:.75rem">
+            <div class="detail-header">
+              <div>
+                <h2 class="detail-name">{selected.name}</h2>
+                <p class="detail-role">{selected.role} · {selected.year}</p>
+              </div>
+              <a class="detail-link" href={selected.url} target="_blank" rel="noopener">GitHub ↗</a>
             </div>
-            {#if selected.url}
-              <a class="detail-link" href={selected.url} target="_blank" rel="noopener">
-                Open ↗
-              </a>
+            <div class="detail-tags">
+              {#each selected.tags as tag}
+                <span class="tag">{tag}</span>
+              {/each}
+            </div>
+          </div>
+        {:else}
+          <div class="detail-thumb" style="background: {selected.color}">
+            {#if selected.thumb_url}
+              <button class="detail-thumb__btn" onclick={() => lightbox = selected!.thumb_url}>
+                <img class="detail-thumb__img" src={selected.thumb_url} alt={selected.name} />
+                <span class="detail-thumb__hint">⤢ Expand</span>
+              </button>
             {:else}
-              <span class="detail-wip">In progress</span>
+              <span class="detail-thumb__text">{selected.thumb}</span>
             {/if}
           </div>
 
-          <p class="detail-desc">{desc(selected)}</p>
-
-          <div class="detail-tags">
-            {#each selected.tags as tag}
-              <span class="tag">{tag}</span>
-            {/each}
-          </div>
-
-          {#if selected.screenshots?.length}
-            <div class="detail-screenshots">
-              <p class="screenshots-label">SCREENSHOTS</p>
-              <div class="screenshots-strip">
-                {#each selected.screenshots as shot}
-                  <button class="screenshot-thumb" onclick={() => lightbox = shot}>
-                    <img src={shot} alt="screenshot" />
-                  </button>
-                {/each}
+          <div class="detail-meta">
+            <div class="detail-header">
+              <div>
+                <h2 class="detail-name">{selected.name}</h2>
+                <p class="detail-role">{selected.role} · {selected.year}</p>
               </div>
+              {#if selected.url}
+                <a class="detail-link" href={selected.url} target="_blank" rel="noopener">
+                  Open ↗
+                </a>
+              {:else}
+                <span class="detail-wip">In progress</span>
+              {/if}
             </div>
-          {/if}
-        </div>
+
+            <p class="detail-desc">{desc(selected)}</p>
+
+            <div class="detail-tags">
+              {#each selected.tags as tag}
+                <span class="tag">{tag}</span>
+              {/each}
+            </div>
+
+            {#if selected.screenshots?.length}
+              <div class="detail-screenshots">
+                <p class="screenshots-label">SCREENSHOTS</p>
+                <div class="screenshots-strip">
+                  {#each selected.screenshots as shot}
+                    <button class="screenshot-thumb" onclick={() => lightbox = shot}>
+                      <img src={shot} alt="screenshot" />
+                    </button>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+          </div>
+        {/if}
       </div>
 
       <!-- Lightbox -->
@@ -624,6 +686,17 @@
   object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: 0 24px 64px rgba(0,0,0,.8);
+}
+
+/* Live component embed */
+.proj-live {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: var(--border-subtle);
+  max-height: 480px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.1) transparent;
 }
 
 .proj-loading {
