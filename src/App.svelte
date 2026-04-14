@@ -13,6 +13,7 @@ import Desktop from './components/macos/Desktop.svelte'
 import Dock    from './components/macos/Dock.svelte'
 import { Cursor } from './components/shared/Cursor.ts'
 import IOS from './components/ios/IOS.svelte'
+import BootScreen from './components/BootScreen.svelte'
 
 const isMobile = window.innerWidth <= 768
 
@@ -26,6 +27,8 @@ onMount(() => {
   if (!isMobile) new Cursor()
 })
 </script>
+
+<BootScreen />
 
 {#if !isMobile}
   <div id="macos" style:background-image={$currentWallpaper ? `url('${$currentWallpaper}')` : undefined} style:background-size="cover" style:background-position="center">
