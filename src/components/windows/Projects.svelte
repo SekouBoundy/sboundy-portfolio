@@ -1,8 +1,9 @@
 <script lang="ts">
   import { supabase } from '$lib/supabase'
   import { currentLang } from '../../stores/index'
-  import BMICalculator    from '../csharp/BMICalculator.svelte'
-  import AgeCalculator   from '../csharp/Age-calculator-master.svelte'
+  import BMICalculator       from '../csharp/BMICalculator.svelte'
+  import AgeCalculator      from '../csharp/Age-calculator-master.svelte'
+  import AgeCalculatorDiagram from '../csharp/AgeCalculatorDiagram.svelte'
   import bmiThumb from '../../assets/images/projects/csharp/Classification.png'
 
   type Project = {
@@ -10,6 +11,8 @@
     name: string
     desc_en: string
     desc_fr: string
+    how_en?: string
+    how_fr?: string
     thumb: string
     thumb_url: string | null
     color: string
@@ -27,6 +30,8 @@
       name: 'BMI Calculator',
       desc_en: 'A cross-platform BMI calculator with metric/imperial support, animated gauge, and color-coded results. Originally built as a Windows desktop app in C#, ported to the web.',
       desc_fr: 'Un calculateur d\'IMC multiplateforme avec support métrique/impérial, jauge animée et résultats colorés. Conçu à l\'origine comme application Windows en C#, porté sur le web.',
+      how_en: `I started this as a Windows Forms app in C# / .NET. The UI was built with drag-and-drop controls in Visual Studio — two NumericUpDown inputs for weight and height, a Button to trigger the calculation, and a Label to display the result.\n\nThe core formula is simple: BMI = weight (kg) ÷ height² (m²). I convert the height from cm to meters before squaring it, then compare the result against the five WHO thresholds (Underweight < 18.5, Normal 18.5–25, Overweight 25–30, Obesity 30–35, Extreme Obesity ≥ 35) to determine the category.\n\nThe silhouette images change dynamically based on the computed category — each image was manually prepared in Figma and mapped to its key in a dictionary. The classification table highlights the active row so the user can see at a glance where they fall.\n\nFor this portfolio I ported the logic 1-to-1 into a Svelte component: reactive variables replace C# properties, and Svelte's {#if} / {#each} blocks replace the Windows Forms event handlers. The green desktop style was kept intentionally to show the original app's look.`,
+      how_fr: `J'ai commencé ce projet comme une application Windows Forms en C# / .NET. L'interface a été construite avec les contrôles glisser-déposer de Visual Studio — deux NumericUpDown pour le poids et la taille, un bouton pour déclencher le calcul, et un Label pour afficher le résultat.\n\nLa formule est simple : IMC = poids (kg) ÷ taille² (m²). Je convertis d'abord la taille de cm en mètres avant de la mettre au carré, puis je compare le résultat aux cinq seuils de l'OMS pour déterminer la catégorie.\n\nLes images de silhouettes changent dynamiquement selon la catégorie calculée — chaque image a été préparée dans Figma et associée à sa clé dans un dictionnaire. Le tableau met en surbrillance la ligne active pour que l'utilisateur voie immédiatement sa catégorie.\n\nPour ce portfolio, j'ai porté la logique à l'identique dans un composant Svelte : les variables réactives remplacent les propriétés C#, et les blocs {#if} / {#each} de Svelte remplacent les gestionnaires d'événements Windows Forms. Le style vert du bureau a été conservé intentionnellement pour montrer l'apparence de l'application originale.`,
       thumb: '⚖️',
       thumb_url: bmiThumb,
       color: '#0f172a',
@@ -42,6 +47,8 @@
       name: 'Age Calculator',
       desc_en: 'A Windows desktop app that calculates your exact age in years, months, days and hours from your birth date. Built in C#, ported to the web.',
       desc_fr: 'Une application Windows qui calcule votre âge exact en années, mois, jours et heures à partir de votre date de naissance. Conçue en C#, portée sur le web.',
+      how_en: `I built this as a Windows Forms app in C# / .NET. The form collects four inputs: gender (radio buttons), birth year (TextBox), birth month (ComboBox), and birth day (TextBox). On click, the handler reads and parses the values, constructs a DateTime object, then runs the date-difference logic.\n\nThe tricky part is the day/month borrowing: if today's day is less than the birth day, I subtract one month and add the number of days in the previous month. Same logic for months borrowing from years. This avoids using TimeSpan (which only gives total days) and gives a natural "X years, Y months, Z days" breakdown.\n\nI also extract the day-of-week from the birth date using DayOfWeek, and the current hour to include in the result string. The gender radio button drives the avatar shown in the result panel.\n\nFor the portfolio I ported all of this to Svelte — reactive variables replace C# fields, the calculate function is identical logic in JavaScript, and the SVG avatar replaces the WinForms PictureBox.`,
+      how_fr: `J'ai construit cette application comme un formulaire Windows en C# / .NET. Le formulaire collecte quatre entrées : le genre (boutons radio), l'année de naissance (TextBox), le mois (ComboBox) et le jour (TextBox). Au clic, le gestionnaire lit et analyse les valeurs, construit un objet DateTime, puis exécute la logique de différence de dates.\n\nLa partie délicate est l'emprunt jour/mois : si le jour actuel est inférieur au jour de naissance, je soustrais un mois et j'ajoute le nombre de jours du mois précédent. Même logique pour les mois qui empruntent aux années. Cela évite d'utiliser TimeSpan (qui ne donne que des jours totaux) et produit un résultat naturel "X ans, Y mois, Z jours".\n\nJ'extrais aussi le jour de la semaine depuis la date de naissance via DayOfWeek, et l'heure actuelle pour l'inclure dans le résultat. Le bouton radio de genre détermine l'avatar affiché dans le panneau de résultat.\n\nPour le portfolio, j'ai porté tout cela en Svelte : les variables réactives remplacent les champs C#, la fonction calculate est la même logique en JavaScript, et l'avatar SVG remplace le PictureBox WinForms.`,
       thumb: '🎂',
       thumb_url: null,
       color: '#0f172a',
@@ -88,6 +95,7 @@
   }
 
   function desc(p: Project) { return lang === 'fr' ? p.desc_fr : p.desc_en }
+  function how(p: Project)  { return lang === 'fr' ? (p.how_fr ?? '') : (p.how_en ?? '') }
   function open(p: Project)  { selected = p; lightbox = null }
   function close()            { selected = null; lightbox = null }
 
@@ -127,6 +135,7 @@
           <div class="proj-live"><BMICalculator /></div>
         {:else if selected.component === 'AgeCalculator'}
           <div class="proj-live"><AgeCalculator /></div>
+          <AgeCalculatorDiagram />
         {/if}
 
         {#if selected.component}
@@ -138,11 +147,20 @@
               </div>
               <a class="detail-link" href={selected.url} target="_blank" rel="noopener">GitHub ↗</a>
             </div>
+            <p class="detail-desc">{desc(selected)}</p>
             <div class="detail-tags">
               {#each selected.tags as tag}
                 <span class="tag">{tag}</span>
               {/each}
             </div>
+            {#if how(selected)}
+              <div class="how-built">
+                <p class="how-built__label">HOW I BUILT IT</p>
+                {#each how(selected).split('\n\n') as para}
+                  <p class="how-built__para">{para}</p>
+                {/each}
+              </div>
+            {/if}
           </div>
         {:else}
           <div class="detail-thumb" style="background: {selected.color}">
@@ -686,6 +704,33 @@
   object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: 0 24px 64px rgba(0,0,0,.8);
+}
+
+/* How I built it */
+.how-built {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  background: rgba(255,255,255,.03);
+  border: var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: .9rem 1rem;
+}
+
+.how-built__label {
+  font-size: .6rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: .12em;
+  color: var(--color-accent);
+  opacity: .85;
+  margin: 0;
+}
+
+.how-built__para {
+  font-size: .82rem;
+  color: var(--color-secondary);
+  line-height: 1.8;
+  margin: 0;
 }
 
 /* Live component embed */
